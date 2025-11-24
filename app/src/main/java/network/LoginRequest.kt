@@ -1,4 +1,4 @@
-package com.pongsawad.blueelephant.network.models
+package com.pongsawad.blueelephant.network
 
 data class LoginRequest(
     val email: String,

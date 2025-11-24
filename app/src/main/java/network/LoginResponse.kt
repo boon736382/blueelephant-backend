@@ -1,11 +1,6 @@
-package com.pongsawad.blueelephant
+package com.pongsawad.blueelephant.network
 
 data class LoginResponse(
-    val token: String?,
-    val user: User?
-)
-
-data class User(
-    val id: Int,
+    val token: String,
     val email: String
 )
