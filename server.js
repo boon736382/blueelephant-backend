@@ -1,25 +1,16 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
-import authRoutes from "./routes/auth.js";
+import authRoutes from "./routes/auth.js"; // <- correct path for Option 1
 
 dotenv.config();
 const app = express();
 
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// Root route (fixes "Cannot GET /")
-app.get("/", (req, res) => {
-    res.json({ message: "API is running correctly 🎉" });
-});
-
-// Auth API
+app.get("/", (req, res) => res.json({ message: "API running" }));
 app.use("/api/auth", authRoutes);
 
-// Start server
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-    console.log("Server running on port " + PORT);
-});
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
