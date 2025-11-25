@@ -4,6 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
+
     private const val BASE_URL = "https://blueelephant-backend.onrender.com/"
 
     private val retrofit: Retrofit by lazy {

@@ -6,9 +6,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.pongsawad.blueelephant.network.ApiClient
-import com.pongsawad.blueelephant.network.RegisterRequest
-import com.pongsawad.blueelephant.network.RegisterResponse
+import com.pongsawad.blueelephant.network.*
+
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,82 +17,48 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var emailBox: EditText
     private lateinit var passwordBox: EditText
     private lateinit var registerBtn: Button
+    private lateinit var goLoginBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_register)
 
+        // Initialize views
         emailBox = findViewById(R.id.emailBox)
         passwordBox = findViewById(R.id.passwordBox)
         registerBtn = findViewById(R.id.registerBtn)
+        goLoginBtn = findViewById(R.id.goLoginBtn)
 
         registerBtn.setOnClickListener {
             val email = emailBox.text.toString().trim()
             val password = passwordBox.text.toString().trim()
 
-            if (email.isEmpty()) {
-                emailBox.error = "Email is required"
-                emailBox.requestFocus()
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            if (password.isEmpty()) {
-                passwordBox.error = "Password is required"
-                passwordBox.requestFocus()
-                return@setOnClickListener
-            }
-
-            if (password.length < 6) {
-                passwordBox.error = "Password must be at least 6 characters"
-                passwordBox.requestFocus()
-                return@setOnClickListener
-            }
-
-            registerUser(email, password)
-        }
-    }
-
-    private fun registerUser(email: String, password: String) {
-        val request = RegisterRequest(email, password)
-
-        ApiClient.apiService.register(request).enqueue(object : Callback<RegisterResponse> {
-            override fun onResponse(
-                call: Call<RegisterResponse>,
-                response: Response<RegisterResponse>
-            ) {
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null && body.success) {
-                        Toast.makeText(
-                            this@RegisterActivity,
-                            "Registration successful",
-                            Toast.LENGTH_SHORT
-                        ).show()
+            val request = RegisterRequest(email, password)
+            ApiClient.apiService.register(request).enqueue(object : Callback<GenericResponse> {
+                override fun onResponse(call: Call<GenericResponse>, response: Response<GenericResponse>) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@RegisterActivity, response.body()?.message ?: "Registered successfully", Toast.LENGTH_SHORT).show()
                         startActivity(Intent(this@RegisterActivity, LoginActivity::class.java))
                         finish()
                     } else {
-                        Toast.makeText(
-                            this@RegisterActivity,
-                            "Registration failed: ${body?.message ?: "Unknown error"}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val errorMsg = response.errorBody()?.string() ?: response.message()
+                        Toast.makeText(this@RegisterActivity, "Registration failed: $errorMsg", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(
-                        this@RegisterActivity,
-                        "Server error: ${response.code()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
-            }
 
-            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
-                Toast.makeText(
-                    this@RegisterActivity,
-                    "Network error: ${t.localizedMessage}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        })
+                override fun onFailure(call: Call<GenericResponse>, t: Throwable) {
+                    Toast.makeText(this@RegisterActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
+
+        goLoginBtn.setOnClickListener {
+            startActivity(Intent(this, LoginActivity::class.java))
+        }
     }
 }
