@@ -1,16 +1,18 @@
 package com.pongsawad.blueelephant
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.pongsawad.blueelephant.network.*
-
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import androidx.lifecycle.lifecycleScope
+import com.pongsawad.blueelephant.network.ApiClient
+import com.pongsawad.blueelephant.network.LoginRequest
+import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 class LoginActivity : AppCompatActivity() {
 
@@ -29,6 +31,8 @@ class LoginActivity : AppCompatActivity() {
         loginBtn = findViewById(R.id.loginBtn)
         goRegisterBtn = findViewById(R.id.goRegisterBtn)
 
+        val apiService = ApiClient.apiService
+
         loginBtn.setOnClickListener {
             val email = emailBox.text.toString().trim()
             val password = passwordBox.text.toString().trim()
@@ -38,33 +42,39 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val request = LoginRequest(email, password)
-            ApiClient.apiService.login(request).enqueue(object : Callback<LoginResponse> {
-                override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
+            // Coroutine for network call
+            lifecycleScope.launch {
+                try {
+                    val response = apiService.login(LoginRequest(email, password))
                     if (response.isSuccessful) {
                         val body = response.body()
-                        if (body?.token != null) {
+                        if (body != null && body.success && body.token != null) {
+                            // Save JWT token locally
+                            val prefs = getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
+                            prefs.edit().putString("JWT_TOKEN", body.token).apply()
+
                             Toast.makeText(this@LoginActivity, body.message, Toast.LENGTH_SHORT).show()
-
-                            // Optional: Save JWT token for future requests
-                            // val prefs = getSharedPreferences("APP_PREFS", MODE_PRIVATE)
-                            // prefs.edit().putString("JWT_TOKEN", body.token).apply()
-
                             startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                             finish()
                         } else {
-                            Toast.makeText(this@LoginActivity, body?.message ?: "Login failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@LoginActivity,
+                                body?.message ?: "Login failed",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     } else {
                         val errorMsg = response.errorBody()?.string() ?: response.message()
-                        Toast.makeText(this@LoginActivity, "Login failed: $errorMsg", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@LoginActivity, "Server error: $errorMsg", Toast.LENGTH_LONG).show()
                     }
+                } catch (e: IOException) {
+                    Toast.makeText(this@LoginActivity, "Network error: ${e.message}", Toast.LENGTH_LONG).show()
+                } catch (e: HttpException) {
+                    Toast.makeText(this@LoginActivity, "HTTP error: ${e.message}", Toast.LENGTH_LONG).show()
+                } catch (e: Exception) {
+                    Toast.makeText(this@LoginActivity, "Unexpected error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
-
-                override fun onFailure(call: Call<LoginResponse>, t: Throwable) {
-                    Toast.makeText(this@LoginActivity, "Network error: ${t.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
+            }
         }
 
         goRegisterBtn.setOnClickListener {
