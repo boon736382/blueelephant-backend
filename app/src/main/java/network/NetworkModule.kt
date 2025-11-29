@@ -1,4 +1,4 @@
 package com.pongsawad.blueelephant.network
 
-class ApiService {
+class NetworkModule {
 }
