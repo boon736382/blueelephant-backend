@@ -1,6 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/friendRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#121212">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Add Friend Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:background="#1E1E1E"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/addFriendInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Add Friend Name"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:padding="12dp"
+            android:backgroundTint="#3F51B5"
+            android:inputType="textPersonName"
+            android:layout_marginEnd="8dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addFriendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:src="@drawable/ic_add"
+            android:tint="#FFFFFF"
+            android:contentDescription="Add Friend"
+            android:backgroundTint="#3F51B5" />
+
+    </LinearLayout>
+
+    <!-- Spacer -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="#2F2F2F" />
+
+    <!-- Friend List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friendRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="16dp"
+        android:background="#121212" />
+
+</LinearLayout>
