@@ -1,17 +1,27 @@
-package com.pongsawad.blueelephant
+package com.pongsawad.blueelephant.ui.theme
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.widget.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import com.pongsawad.blueelephant.ui.theme.MainChatActivity
+import com.pongsawad.blueelephant.R
 
 class OnboardingActivity : AppCompatActivity() {
 
-    private val PICK_IMAGE = 100
     private var imageUri: Uri? = null
+    private val prefs by lazy { getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE) }
+
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            imageUri = uri
+            findViewById<ImageView>(R.id.photoPreview).setImageURI(uri)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,12 +30,10 @@ class OnboardingActivity : AppCompatActivity() {
         val genderGroup = findViewById<RadioGroup>(R.id.genderGroup)
         val ageInput = findViewById<EditText>(R.id.ageInput)
         val photoBtn = findViewById<Button>(R.id.photoBtn)
-        val photoPreview = findViewById<ImageView>(R.id.photoPreview)
         val submitBtn = findViewById<Button>(R.id.submitBtn)
 
         photoBtn.setOnClickListener {
-            val gallery = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI)
-            startActivityForResult(gallery, PICK_IMAGE)
+            pickImageLauncher.launch("image/*")
         }
 
         submitBtn.setOnClickListener {
@@ -45,21 +53,17 @@ class OnboardingActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Save info (could use SharedPreferences or send to backend)
-            val intent = Intent(this, ProfileActivity::class.java)
-            intent.putExtra("gender", gender)
-            intent.putExtra("age", age)
-            intent.putExtra("photoUri", imageUri.toString())
-            startActivity(intent)
-            finish()
-        }
-    }
+            // Save profile state
+            prefs.edit().putBoolean("HAS_PROFILE", true).apply()
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK && requestCode == PICK_IMAGE) {
-            imageUri = data?.data
-            findViewById<ImageView>(R.id.photoPreview).setImageURI(imageUri)
+            // Optionally save profile info: gender, age, photoUri
+            prefs.edit().putString("PROFILE_GENDER", gender)
+            prefs.edit().putString("PROFILE_AGE", age)
+            prefs.edit().putString("PROFILE_PHOTO_URI", imageUri.toString()).apply()
+
+            // Go to main chat
+            startActivity(Intent(this, MainChatActivity::class.java))
+            finish()
         }
     }
 }

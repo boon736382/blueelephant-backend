@@ -1,14 +1,15 @@
-package com.pongsawad.blueelephant
+package com.pongsawad.blueelephant.ui.theme
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.pongsawad.blueelephant.R
+import com.pongsawad.blueelephant.ui.theme.FriendActivity
 
 class MainChatActivity : AppCompatActivity() {
 
     private lateinit var friendBtn: Button
-    private lateinit var swipeBtn: Button
     private lateinit var exitBtn: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,7 +18,6 @@ class MainChatActivity : AppCompatActivity() {
 
         // Match EXACT IDs from activity_main_chat.xml
         friendBtn = findViewById(R.id.friendBtn)
-        swipeBtn = findViewById(R.id.swipeBtn)
         exitBtn = findViewById(R.id.exitBtn)
 
         // Open Friend List (FriendActivity)
@@ -27,11 +27,6 @@ class MainChatActivity : AppCompatActivity() {
         }
 
         // Open Swipe Activity (FriendSwipeActivity)
-        swipeBtn.setOnClickListener {
-            val intent = Intent(this, FriendSwipeActivity::class.java)
-            startActivity(intent)
-        }
-
         // Close App
         exitBtn.setOnClickListener {
             finishAffinity()

@@ -32,6 +32,24 @@ export const registerUser = async (req, res) => {
   }
 };
 
+export const getAllUsers = async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, name, email FROM users');
+
+        // If the database is empty, send a fake user so we can test the UI
+        if (result.rows.length === 0) {
+            return res.json([
+                { id: 999, name: "Database Connection Successful", email: "test@example.com" }
+            ]);
+        }
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Database Error:", error);
+        res.status(500).json({ message: "Database error", error: error.message });
+    }
+};
+
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -78,3 +96,4 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
+

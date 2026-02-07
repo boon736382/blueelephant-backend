@@ -2,10 +2,10 @@
   "name": "blueelephant-backend",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
+  "main": "app/backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node app/backend/server.js",
+    "dev": "nodemon app/backend/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

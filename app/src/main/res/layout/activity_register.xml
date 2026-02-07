@@ -1,44 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:padding="24dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/nameBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/nameInput"
         android:hint="Name"
-        android:layout_marginBottom="16dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <EditText
-        android:id="@+id/emailBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/emailInput"
         android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:layout_marginBottom="16dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <EditText
-        android:id="@+id/passwordBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/passwordInput"
         android:hint="Password"
         android:inputType="textPassword"
-        android:layout_marginBottom="24dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/registerBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Register"
-        android:layout_marginBottom="16dp"/>
-
-    <Button
-        android:id="@+id/goLoginBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Already have an account? Login"/>
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -1,4 +1,5 @@
-package com.pongsawad.blueelephant.com.pongsawad.blueelephant.ui.theme
+package com.pongsawad.blueelephant
 
-class FriendCheckResponse {
-}
+data class FriendCheckResponse(
+    val exists: Boolean
+)

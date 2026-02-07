@@ -1,64 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/friendRoot"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/friends_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#121212">
+    android:background="#FFFFFF"
+    tools:context=".ui.theme.FriendActivity">
 
-    <!-- Add Friend Section -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#1E1E1E"
+        android:gravity="center_vertical"
+        android:background="#6200EE"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:gravity="center_vertical">
+        android:paddingEnd="16dp">
 
-        <EditText
-            android:id="@+id/addFriendInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Add Friend Name"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#CCCCCC"
-            android:padding="12dp"
-            android:backgroundTint="#3F51B5"
-            android:inputType="textPersonName"
-            android:layout_marginEnd="8dp" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addFriendButton"
+        <TextView
+            android:id="@+id/tv_toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:src="@drawable/ic_add"
-            android:tint="#FFFFFF"
-            android:contentDescription="Add Friend"
-            android:backgroundTint="#3F51B5" />
-
+            android:text="Friends"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Spacer -->
-    <View
+    <EditText
+        android:id="@+id/et_search_friends"
         android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:background="#2F2F2F" />
+        android:layout_height="48dp"
+        android:layout_margin="12dp"
+        android:padding="12dp"
+        android:hint="Search friends..."
+        android:textColorHint="#888888"
+        android:textColor="#000000"
+        android:background="@drawable/search_bar_background"
+        android:drawableStart="@android:drawable/ic_menu_search"
+        android:drawablePadding="8dp"
+        android:importantForAutofill="no"
+        android:inputType="textPersonName"/>
 
-    <!-- Friend List -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/friendRecycler"
+        android:id="@+id/rv_friends"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginTop="16dp"
-        android:background="#121212" />
+        android:background="#FFFFFF"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp"
+        tools:listitem="@layout/item_friend_card" />
 
 </LinearLayout>

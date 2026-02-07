@@ -1,34 +1,54 @@
-import android.content.Intent
+package com.pongsawad.blueelephant.ui.theme
+
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.pongsawad.blueelephant.Friend
+import com.pongsawad.blueelephant.FriendAdapter
 import com.pongsawad.blueelephant.R
+import com.pongsawad.blueelephant.network.ApiClient // Import your existing ApiClient
+import kotlinx.coroutines.launch
 
-class FriendsActivity : AppCompatActivity() {
+class FriendActivity : AppCompatActivity() {
 
     private lateinit var rvFriends: RecyclerView
-    private val friends = mutableListOf<Friend>()
+    private val friendsList = mutableListOf<Friend>()
+    private lateinit var adapter: FriendAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friend)
 
         rvFriends = findViewById(R.id.rv_friends)
-        val adapter = FriendAdapter(friends) { friend ->
-            // Open chat with selected friend
-            val intent = Intent(this, ChatActivity::class.java)
-            intent.putExtra("friendId", friend.id)
-            intent.putExtra("friendName", friend.name)
-            startActivity(intent)
+
+        // Initialize adapter with empty list first
+        adapter = FriendAdapter(friendsList) { friend ->
+            // Handle click
         }
 
         rvFriends.adapter = adapter
         rvFriends.layoutManager = LinearLayoutManager(this)
 
-        // TODO: Load friends from backend
-        friends.add(Friend("1", "Alice"))
-        friends.add(Friend("2", "Bob"))
-        adapter.notifyDataSetChanged()
+        // CALL THE DATABASE DATA HERE
+        loadFriends()
+    }
+
+    private fun loadFriends() {
+        lifecycleScope.launch {
+            try {
+                val list = ApiClient.apiService.getFriends()
+                if (list.isNotEmpty()) {
+                    // We must update the list and notify the adapter
+                    friendsList.clear()
+                    friendsList.addAll(list)
+                    adapter.notifyDataSetChanged()
+                }
+            } catch (e: Exception) {
+                Log.e("NETWORK_ERROR", "Failed: ${e.message}")
+            }
+        }
     }
 }

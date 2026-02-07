@@ -1,4 +1,6 @@
 package com.pongsawad.blueelephant.com.pongsawad.blueelephant.ui.theme
 
-class Message {
-}
+data class Message(
+    val text: String,
+    val isMe: Boolean
+)
