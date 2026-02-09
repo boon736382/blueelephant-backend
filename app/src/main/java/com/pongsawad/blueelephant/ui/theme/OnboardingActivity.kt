@@ -99,9 +99,17 @@ class OnboardingActivity : AppCompatActivity() {
 
                 if (response.isSuccessful) {
                     Toast.makeText(this@OnboardingActivity, "Profile Created Successfully!", Toast.LENGTH_SHORT).show()
-                    // navigate to FriendActivity or MainActivity
-                    // startActivity(Intent(this@OnboardingActivity, FriendActivity::class.java))
-                    finish()
+
+                    // 1. Save onboarding status so the user doesn't see this screen again
+                    prefs.edit().putBoolean("onboarding_complete", true).apply()
+                    // 2. Start the next Activity
+                    // Make sure "MainActivityChat" is the exact name of your class!
+                    val intent = Intent(this@OnboardingActivity, MainActivity::class.java)
+                    // 3. This flag clears the "Back Stack" so the user can't go back to Onboarding
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+                    startActivity(intent)
+                    finish() // Close OnboardingActivity
                 } else {
                     val errorLog = response.errorBody()?.string()
                     Log.e("API_ERROR", "Status: ${response.code()} - $errorLog")
