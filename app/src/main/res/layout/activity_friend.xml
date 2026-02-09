@@ -1,49 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/friends_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#F5F5F5"
     tools:context=".ui.theme.FriendActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="#3F51B5"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:elevation="4dp">
+    <!-- 1. Proper Toolbar for Action Bar functionality -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:id="@+id/tv_toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Elephant Chat"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#3F51B5"
+            app:title="Elephant Chat"
+            app:titleTextColor="#FFFFFF" />
 
-    <EditText
-        android:id="@+id/et_search_friends"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- 2. Modern Search Input with TextInputLayout -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/searchInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_margin="12dp"
-        android:padding="12dp"
         android:hint="Search by name..."
-        android:textColorHint="#555555"
-        android:textColor="#000000"
-        android:background="@android:drawable/editbox_background"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:drawablePadding="8dp"
-        android:inputType="textPersonName"/>
+        app:startIconDrawable="@android:drawable/ic_menu_search"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/searchEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:maxLines="1" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 3. "My Profile" Label -->
     <TextView
+        android:id="@+id/myProfileLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="My Profile"
@@ -51,16 +59,23 @@
         android:textStyle="bold"
         android:textColor="#3F51B5"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="4dp"/>
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/searchInputLayout"
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- 4. Profile CardView -->
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
+        android:id="@+id/myProfileCard"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="12dp"
-        android:layout_marginBottom="16dp"
         app:cardCornerRadius="12dp"
-        app:cardElevation="2dp">
+        app:cardElevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/myProfileLabel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -68,15 +83,14 @@
             android:orientation="horizontal"
             android:padding="12dp"
             android:gravity="center_vertical">
-
+            <!-- Profile Card content is unchanged -->
             <com.google.android.material.imageview.ShapeableImageView
-                android:id="@+id/iv_my_profile"
+                android:id="@+id/profileImageView"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:scaleType="centerCrop"
-                android:background="#E0E0E0"
                 app:shapeAppearanceOverlay="@style/CircleImage"
-                android:src="@drawable/ic_launcher_background" />
+                tools:src="@drawable/ic_launcher_background" />
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -86,26 +100,28 @@
                 android:layout_marginStart="16dp">
 
                 <TextView
-                    android:id="@+id/tv_my_name"
+                    android:id="@+id/nameTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Loading name..."
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="#000000"/>
+                    android:textColor="#000000"
+                    tools:text="Pongsawad"/>
 
                 <TextView
-                    android:id="@+id/tv_my_info"
+                    android:id="@+id/infoTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Age • Gender"
                     android:textSize="14sp"
-                    android:textColor="#757575"/>
+                    android:textColor="#757575"
+                    tools:text="25 • Male" />
             </LinearLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- 5. "All Friends" Label -->
     <TextView
+        android:id="@+id/allFriendsLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="All Friends"
@@ -113,13 +129,21 @@
         android:textStyle="bold"
         android:textColor="#3F51B5"
         android:layout_marginStart="16dp"
-        android:layout_marginBottom="4dp"/>
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/myProfileCard"
+        app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- 6. Friends RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_friends"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/friendsRecyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
         android:padding="4dp"
+        app:layout_constraintTop_toBottomOf="@id/allFriendsLabel"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_friend_card" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

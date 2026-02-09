@@ -17,40 +17,36 @@ class FriendAdapter(
 ) : RecyclerView.Adapter<FriendAdapter.FriendViewHolder>() {
 
     fun updateData(newList: List<Friend>) {
-        this.friends = newList.toMutableList()
-        notifyDataSetChanged() // This tells the UI to actually draw the items
+        this.friends = newList
+        notifyDataSetChanged()
     }
 
-    // 1. MUST HAVE: This tells the adapter which layout file to use
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_friend_card, parent, false)
         return FriendViewHolder(view)
     }
 
-    // 2. Logic to put data into the views
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
         val friend = friends[position]
         holder.tvName.text = friend.name ?: "Unknown User"
+        holder.tvStatusText.text = friend.status ?: "Offline"
 
-        // --- DYNAMIC STATUS DOT ---
-        val statusDot = holder.itemView.findViewById<View>(R.id.view_status_dot)
-
-        if (friend.status.equals("Online", ignoreCase = true)) {
-            // Vibrant Green for Online
-            statusDot.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4CAF50"))
-            holder.tvStatus.text = "Online"
+        // --- DYNAMIC STATUS DOT LOGIC ---
+        val statusColor = if (friend.status.equals("Online", ignoreCase = true)) {
+            "#4CAF50" // Green
         } else {
-            // Soft Gray for Offline
-            statusDot.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
-            holder.tvStatus.text = "Offline"
+            "#9E9E9E" // Gray
         }
 
-        // --- FAIL-SAFE IMAGE LOADING ---
+        holder.viewStatusDot.backgroundTintList = ColorStateList.valueOf(Color.parseColor(statusColor))
+
+        // --- IMAGE LOADING ---
         Glide.with(holder.itemView.context)
             .load(friend.imageUrl)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(R.drawable.ic_launcher_background)
-            .error(R.drawable.ic_default_avatar) // Use a silhouette icon
+            .error(R.drawable.ic_launcher_foreground)
             .circleCrop()
             .into(holder.ivAvatar)
 
@@ -59,9 +55,17 @@ class FriendAdapter(
 
     override fun getItemCount() = friends.size
 
-    inner class FriendViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    // FIXED: Removed the double class declaration and corrected the casts
+    class FriendViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.friendName)
         val ivAvatar: ImageView = itemView.findViewById(R.id.friendAvatar)
-        val tvStatus: TextView = itemView.findViewById(R.id.view_status_dot)
+
+        // This is for the actual Text (e.g., "Online")
+        // Make sure you have a TextView in item_friend_card with this ID!
+        val tvStatusText: TextView = itemView.findViewById(R.id.friendStatusText)
+
+        // This is for the Green/Gray circle dot
+        // This must be 'View' to match your XML View tag
+        val viewStatusDot: View = itemView.findViewById(R.id.view_status_dot)
     }
 }

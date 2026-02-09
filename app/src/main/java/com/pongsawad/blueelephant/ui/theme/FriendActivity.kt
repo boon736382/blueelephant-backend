@@ -33,7 +33,7 @@ class FriendActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_friend)
 
-        rvFriends = findViewById(R.id.rv_friends)
+        rvFriends = findViewById(R.id.friendsRecyclerView)
         rvFriends.layoutManager = LinearLayoutManager(this)
 
         // Initialize adapter
@@ -59,10 +59,10 @@ class FriendActivity : AppCompatActivity() {
         // This key must be saved in OnboardingActivity when the image upload finishes!
         val relativePath = prefs.getString("user_photo_path", null)
 
-        findViewById<TextView>(R.id.tv_my_name).text = name
-        findViewById<TextView>(R.id.tv_my_info).text = "$age years old • $gender"
+        findViewById<TextView>(R.id.nameTextView).text = name
+        findViewById<TextView>(R.id.infoTextView).text = "$age years old • $gender"
 
-        val ivMyProfile = findViewById<ImageView>(R.id.iv_my_profile)
+        val ivMyProfile = findViewById<ImageView>(R.id.profileImageView)
 
         if (!relativePath.isNullOrEmpty()) {
             // Build full URL: https://.../uploads/filename.jpg
