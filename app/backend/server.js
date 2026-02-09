@@ -24,11 +24,20 @@ app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 
 // Add this temporarily to index.js
-app.get('/debug', (req, res) => {
-    res.json({
-        message: "Server is working",
-        available_paths: ["/api/auth/users", "/api/auth/register"]
+// Replace your current /debug route with this in index.js
+app.get('/debug-routes', (req, res) => {
+    const routes = [];
+    app._router.stack.forEach((middleware) => {
+        if (middleware.route) { // routes registered directly on the app
+            routes.push(`${Object.keys(middleware.route.methods)} ${middleware.route.path}`);
+        } else if (middleware.name === 'router') { // router middleware
+            middleware.handle.stack.forEach((handler) => {
+                const path = handler.route ? handler.route.path : '??';
+                routes.push(`NESTED: ${path}`);
+            });
+        }
     });
+    res.json({ routes });
 });
 
 
@@ -44,6 +53,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });

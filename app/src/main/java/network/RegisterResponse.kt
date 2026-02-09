@@ -1,13 +1,13 @@
 package com.pongsawad.blueelephant.network
 
 data class RegisterResponse(
-    val success: Boolean,
-    val message: String?,
-    val user: UserResponse?
+    val message: String,
+    val user: UserData
 )
 
-data class UserResponse(
-    val id: String?,
-    val name: String?,
-    val email: String?
+data class UserData(
+    val id: Int,
+    val name: String,
+    val email: String,
+    val profile_image: String? = null // 👈 Add this line here!
 )

@@ -21,6 +21,18 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"/>
 
+        <EditText
+            android:id="@+id/nameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Full Name"
+            android:inputType="textPersonName"
+            android:textColor="#000000"
+            android:textColorHint="#757575"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"/>
+
         <RadioGroup
             android:id="@+id/genderGroup"
             android:layout_width="match_parent"
@@ -51,7 +63,7 @@
             android:hint="Age"
             android:inputType="number"
             android:textColor="#000000"
-            android:textColorHint="#000000"
+            android:textColorHint="#757575"
             android:padding="12dp"
             android:background="@android:drawable/edit_text"
             android:layout_marginBottom="16dp"/>
@@ -72,7 +84,8 @@
             android:layout_height="120dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"
-            android:background="#E0E0E0"/>
+            android:background="#E0E0E0"
+            android:scaleType="centerCrop"/>
 
         <Button
             android:id="@+id/submitBtn"

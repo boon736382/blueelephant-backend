@@ -6,39 +6,46 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.pongsawad.blueelephant.R
-
+import com.bumptech.glide.Glide
 
 class FriendAdapter(
-    private val friends: List<Friend>,
+    private var friends: List<Friend>,
     private val onClick: (Friend) -> Unit
 ) : RecyclerView.Adapter<FriendAdapter.FriendViewHolder>() {
-    // Inside FriendAdapter class
-    fun updateData(newFriends: List<Friend>) {
-        // This ensures the adapter's internal list is replaced with the fresh data from Render
-        (friends as MutableList).clear()
-        friends.addAll(newFriends)
+
+    fun updateData(newList: List<Friend>) {
+        this.friends = newList
         notifyDataSetChanged()
     }
-    inner class FriendViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        // Ensure these IDs (friendName and friendAvatar) exist inside item_friend_card.xml
-        val tvName: TextView = itemView.findViewById(R.id.friendName)
-        val ivAvatar: ImageView = itemView.findViewById(R.id.friendAvatar)
-    }
 
+    // 1. MUST HAVE: This tells the adapter which layout file to use
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FriendViewHolder {
-        // Changed R.layout.item_friend to R.layout.item_friend_card to match your image
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_friend_card, parent, false)
         return FriendViewHolder(view)
     }
 
+    // 2. Logic to put data into the views
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
         val friend = friends[position]
         holder.tvName.text = friend.name
-        holder.ivAvatar.setImageResource(R.mipmap.ic_launcher) // placeholder
+        holder.tvStatus.text = friend.status
+
+        // ✅ This is how images "Fully Work" on the internet
+        Glide.with(holder.itemView.context)
+            .load(friend.imageUrl) // The URL from your server/Firebase
+            .placeholder(R.drawable.ic_launcher_background) // Show this while loading
+            .circleCrop() // Makes it a nice circle
+            .into(holder.ivAvatar)
+
         holder.itemView.setOnClickListener { onClick(friend) }
     }
 
     override fun getItemCount() = friends.size
+
+    inner class FriendViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val tvName: TextView = itemView.findViewById(R.id.friendName)
+        val ivAvatar: ImageView = itemView.findViewById(R.id.friendAvatar)
+        val tvStatus: TextView = itemView.findViewById(R.id.friendStatus)
+    }
 }

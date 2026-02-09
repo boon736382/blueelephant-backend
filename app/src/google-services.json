@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "195926480213",
+    "project_id": "blue-elephant-2",
+    "storage_bucket": "blue-elephant-2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:195926480213:android:e1a3c65330f52c90d04bdc",
+        "android_client_info": {
+          "package_name": "com.pongsawad.blueelephant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQcWiBJTSg-kEQ3o87CRUtnhrlJnV_L4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

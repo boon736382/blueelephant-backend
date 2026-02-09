@@ -3,37 +3,65 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:gravity="center"
-    android:background="#121212">
+    android:padding="24dp"
+    android:background="#FFFFFF"
+    android:gravity="top|center_horizontal">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp"
+        android:text="Blue Elephant Menu"
+        android:textColor="#000000"
+        android:textSize="26sp"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/friendBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="65dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#3F51B5"
         android:text="Friends List"
+        android:textAllCaps="false"
         android:textColor="#FFFFFF"
-        android:background="#333333"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp" />
+        android:textSize="18sp" />
 
     <Button
         android:id="@+id/swipeBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="65dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="#3F51B5"
         android:text="Swipe Profiles"
+        android:textAllCaps="false"
         android:textColor="#FFFFFF"
-        android:background="#333333"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp" />
+        android:textSize="18sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#DDDDDD"
+        android:layout_marginBottom="32dp"/>
+
+    <Button
+        android:id="@+id/logoutBtn"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#757575"
+        android:text="Logout"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
 
     <Button
         android:id="@+id/exitBtn"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
+        android:backgroundTint="#B00020"
         android:text="Exit App"
-        android:textColor="#FFFFFF"
-        android:background="#AA0000"
-        android:padding="16dp" />
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
 
 </LinearLayout>

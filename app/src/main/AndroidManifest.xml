@@ -3,6 +3,7 @@
 
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -11,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.Blueelephant">
+        android:theme="@style/Theme.BlueElephant"
+        >
 
         <!-- Launcher activity -->
         <activity
@@ -25,11 +27,13 @@
 
         <!-- Other activities -->
         <activity android:name=".ui.theme.FriendActivity" />
-        <activity android:name=".ui.theme.MainChatActivity"/>
+        <activity android:name=".ui.theme.MainActivity"/>
         <activity android:name=".LoginActivity"/>
-        <activity android:name=".RegisterActivity"/>
+        <activity android:name=".RegisterActivity"
+            android:exported="true"/>
         <activity android:name=".ui.theme.OnboardingActivity"/>
         <activity android:name=".ChatRoomActivity" />
+        <activity android:name=".ui.theme.ChatActivity" />
 
 
     </application>

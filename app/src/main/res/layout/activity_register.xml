@@ -1,32 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="8dp"
+        android:text="Create Account"
+        android:textColor="#000000"
+        android:textSize="28sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:text="Join the Blue Elephant community"
+        android:textColor="#000000"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/nameInput"
-        android:hint="Name"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="55dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:drawable/editbox_background"
+        android:hint="Full Name"
+        android:textColor="#000000"
+        android:textColorHint="#555555"
+        android:inputType="textPersonName"
+        android:paddingStart="16dp" />
 
     <EditText
         android:id="@+id/emailInput"
-        android:hint="Email"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="55dp"
+        android:layout_marginBottom="16dp"
+        android:background="@android:drawable/editbox_background"
+        android:hint="Email Address"
+        android:textColor="#000000"
+        android:textColorHint="#555555"
+        android:inputType="textEmailAddress"
+        android:paddingStart="16dp" />
 
     <EditText
         android:id="@+id/passwordInput"
-        android:hint="Password"
-        android:inputType="textPassword"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="55dp"
+        android:layout_marginBottom="24dp"
+        android:background="@android:drawable/editbox_background"
+        android:hint="Password (min. 6 characters)"
+        android:textColor="#000000"
+        android:textColorHint="#555555"
+        android:inputType="textPassword"
+        android:paddingStart="16dp" />
 
     <Button
         android:id="@+id/registerBtn"
-        android:text="Register"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="55dp"
+        android:backgroundTint="#2E7D32"
+        android:text="Create Account"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/loginLink"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:padding="8dp"
+        android:text="Already have an account? Log In"
+        android:textColor="#2E7D32"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+    <Button
+        android:id="@+id/selectImageBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Profile Image"
+        android:layout_marginBottom="16dp"/>
+    <ImageView
+        android:id="@+id/profilePreview"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:scaleType="centerCrop"
+        android:src="@android:drawable/ic_menu_gallery" />
+
 </LinearLayout>

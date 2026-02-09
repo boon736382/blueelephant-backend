@@ -4,15 +4,31 @@ dotenv.config();
 
 const { Pool } = pkg;
 
-// Create a pool using DATABASE_URL for cloud deployment
 const pool = new Pool({
-connectionString: process.env.DATABASE_URL,
-ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
 });
 
-// Test connection
-pool.connect()
-.then(() => console.log('Connected to PostgreSQL database'))
-.catch(err => console.error('PostgreSQL connection error:', err));
+// This function creates the table if it doesn't exist
+const initDb = async () => {
+    const queryText = `
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100),
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );`;
+
+    try {
+        await pool.query(queryText);
+        console.log("✅ Users table is ready");
+    } catch (err) {
+        console.error("❌ Error initializing database:", err.message);
+    }
+};
+
+// Run the initialization
+initDb();
 
 export default pool;

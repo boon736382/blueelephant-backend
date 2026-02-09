@@ -7,8 +7,6 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 // These imports are vital if the IDE is struggling to link files
 import com.pongsawad.blueelephant.LoginActivity
-import com.pongsawad.blueelephant.ui.theme.OnboardingActivity
-import com.pongsawad.blueelephant.ui.theme.MainChatActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -28,7 +26,7 @@ class SplashActivity : AppCompatActivity() {
             val nextActivity = when {
                 !isLoggedIn -> LoginActivity::class.java
                 !hasProfile -> OnboardingActivity::class.java
-                else -> MainChatActivity::class.java
+                else -> MainActivity::class.java
             }
 
             startActivity(Intent(this, nextActivity))
