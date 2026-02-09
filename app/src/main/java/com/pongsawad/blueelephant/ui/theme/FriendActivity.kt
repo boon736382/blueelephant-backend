@@ -49,56 +49,62 @@ class FriendActivity : AppCompatActivity() {
     }
 
     private fun displayMyProfile() {
-        val name = prefs.getString("PROFILE_NAME", "User Name")
-        val age = prefs.getString("PROFILE_AGE", "??")
-        val gender = prefs.getString("PROFILE_GENDER", "Unknown")
+        // 1. MATCH THE KEYS used in Onboarding/Login
+        val name = prefs.getString("user_name", "User Name")
+        val age = prefs.getString("user_age", "??")
+        val gender = prefs.getString("user_gender", "Unknown")
 
-        // Use the URL we saved from Firebase in Onboarding
-        val photoUrl = prefs.getString("PROFILE_PHOTO_URL", null)
+        // 2. IMAGE PATH: Prefix the path with your Render URL
+        val serverBaseUrl = "https://blueelephant-backend.onrender.com/"
+        val relativePath = prefs.getString("user_photo_path", null)
 
-        val tvMyName = findViewById<TextView>(R.id.tv_my_name)
-        val tvMyInfo = findViewById<TextView>(R.id.tv_my_info)
-        val ivMyProfile = findViewById<ImageView>(R.id.iv_my_profile)
+        findViewById<TextView>(R.id.tv_my_name).text = name
+        findViewById<TextView>(R.id.tv_my_info).text = "$age years old • $gender"
 
-        tvMyName.text = name
-        tvMyInfo.text = "$age years old • $gender"
-
-        if (!photoUrl.isNullOrEmpty()) {
+        if (!relativePath.isNullOrEmpty()) {
+            val fullUrl = if (relativePath.startsWith("http")) relativePath else serverBaseUrl + relativePath
             Glide.with(this)
-                .load(photoUrl)
+                .load(fullUrl)
                 .circleCrop()
-                .placeholder(R.drawable.ic_launcher_background) // Fallback while loading
-                .into(ivMyProfile)
+                .into(findViewById<ImageView>(R.id.iv_my_profile))
         }
     }
 
-
     private fun loadFriends() {
-        val myName = prefs.getString("PROFILE_NAME", "")
+        // Make sure this matches what was saved during login/onboarding!
+        val myName = prefs.getString("user_name", "")
+        val serverBaseUrl = "https://blueelephant-backend.onrender.com/"
 
         lifecycleScope.launch {
             try {
                 val response = ApiClient.apiService.getAllUsers()
                 if (response.isSuccessful) {
-                    val serverList = response.body()
-                    if (serverList != null) {
-                        val mappedList = serverList
-                            .filter { it.name != myName }
-                            .map { u ->
-                                Friend(
-                                    id = u.id.toString(),
-                                    name = u.name,
-                                    email = u.email,
-                                    status = "Online",
-                                    imageUrl = u.profile_image // Ensure your User model has this field
-                                )
+                    val serverList = response.body() ?: emptyList()
+
+                    val mappedList = serverList
+                        .filter { it.name != myName }
+                        .map { u ->
+                            // Build the full image URL for each friend
+                            val friendImageUrl = if (u.profile_image?.startsWith("http") == true) {
+                                u.profile_image
+                            } else {
+                                serverBaseUrl + u.profile_image
                             }
-                        // ✅ IMPORTANT: Update the adapter with the new list
-                        adapter.updateData(mappedList)
-                    }
+
+                            Friend(
+                                id = u.id.toString(),
+                                name = u.name ?: "Unknown",
+                                email = u.email ?: "",
+                                status = "Online",
+                                imageUrl = friendImageUrl // Now Glide can load it
+                            )
+                        }
+                    adapter.updateData(mappedList)
+                } else {
+                    Log.e("API_ERROR", "Code: ${response.code()} Body: ${response.errorBody()?.string()}")
                 }
             } catch (e: Exception) {
-                Log.e("NETWORK_ERROR", "${e.message}")
+                Log.e("NETWORK_ERROR", "Failed to fetch: ${e.message}")
             }
         }
     }

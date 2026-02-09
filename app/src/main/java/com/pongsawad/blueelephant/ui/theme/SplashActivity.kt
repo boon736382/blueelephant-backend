@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.pongsawad.blueelephant.LoginActivity
 import com.pongsawad.blueelephant.R
 
-class MainActivity : AppCompatActivity() {
+class SplashActivity : AppCompatActivity() {
 
     private lateinit var friendBtn: Button
     private lateinit var swipeBtn: Button

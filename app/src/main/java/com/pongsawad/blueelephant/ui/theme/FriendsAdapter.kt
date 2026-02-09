@@ -14,8 +14,8 @@ class FriendAdapter(
 ) : RecyclerView.Adapter<FriendAdapter.FriendViewHolder>() {
 
     fun updateData(newList: List<Friend>) {
-        this.friends = newList
-        notifyDataSetChanged()
+        this.friends = newList.toMutableList()
+        notifyDataSetChanged() // This tells the UI to actually draw the items
     }
 
     // 1. MUST HAVE: This tells the adapter which layout file to use
