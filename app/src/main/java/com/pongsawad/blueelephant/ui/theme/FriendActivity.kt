@@ -2,7 +2,6 @@ package com.pongsawad.blueelephant.ui.theme
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -25,6 +24,9 @@ class FriendActivity : AppCompatActivity() {
     private lateinit var adapter: FriendAdapter
     private var friendList = mutableListOf<Friend>()
 
+    // Base URL for your Render backend
+    private val BASE_URL = "https://blueelephant-backend.onrender.com/"
+
     private val prefs by lazy { getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,46 +36,49 @@ class FriendActivity : AppCompatActivity() {
         rvFriends = findViewById(R.id.rv_friends)
         rvFriends.layoutManager = LinearLayoutManager(this)
 
-        displayMyProfile()
-
-        // Initialize with empty list first
+        // Initialize adapter
         adapter = FriendAdapter(friendList) { selectedFriend ->
             val intent = Intent(this, ChatRoomActivity::class.java)
             intent.putExtra("FRIEND_NAME", selectedFriend.name)
             intent.putExtra("FRIEND_ID", selectedFriend.id)
             startActivity(intent)
         }
-
         rvFriends.adapter = adapter
+
+        // Sync local profile view and load remote friends
+        displayMyProfile()
         loadFriends()
     }
 
     private fun displayMyProfile() {
-        // 1. MATCH THE KEYS used in Onboarding/Login
-        val name = prefs.getString("user_name", "User Name")
+        // MUST match the keys saved in OnboardingActivity success block
+        val name = prefs.getString("user_name", "Unknown User")
         val age = prefs.getString("user_age", "??")
         val gender = prefs.getString("user_gender", "Unknown")
 
-        // 2. IMAGE PATH: Prefix the path with your Render URL
-        val serverBaseUrl = "https://blueelephant-backend.onrender.com/"
+        // This key must be saved in OnboardingActivity when the image upload finishes!
         val relativePath = prefs.getString("user_photo_path", null)
 
         findViewById<TextView>(R.id.tv_my_name).text = name
         findViewById<TextView>(R.id.tv_my_info).text = "$age years old • $gender"
 
+        val ivMyProfile = findViewById<ImageView>(R.id.iv_my_profile)
+
         if (!relativePath.isNullOrEmpty()) {
-            val fullUrl = if (relativePath.startsWith("http")) relativePath else serverBaseUrl + relativePath
+            // Build full URL: https://.../uploads/filename.jpg
+            val fullUrl = if (relativePath.startsWith("http")) relativePath else BASE_URL + relativePath
+
             Glide.with(this)
                 .load(fullUrl)
                 .circleCrop()
-                .into(findViewById<ImageView>(R.id.iv_my_profile))
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_foreground) // Change to a real error icon later
+                .into(ivMyProfile)
         }
     }
 
     private fun loadFriends() {
-        // Make sure this matches what was saved during login/onboarding!
         val myName = prefs.getString("user_name", "")
-        val serverBaseUrl = "https://blueelephant-backend.onrender.com/"
 
         lifecycleScope.launch {
             try {
@@ -82,29 +87,32 @@ class FriendActivity : AppCompatActivity() {
                     val serverList = response.body() ?: emptyList()
 
                     val mappedList = serverList
-                        .filter { it.name != myName }
+                        .filter { it.name != myName && !it.name.isNullOrEmpty() }
                         .map { u ->
-                            // Build the full image URL for each friend
-                            val friendImageUrl = if (u.profile_image?.startsWith("http") == true) {
-                                u.profile_image
-                            } else {
-                                serverBaseUrl + u.profile_image
+                            // Ensure the image path is converted to a full URL
+                            val rawPath = u.profile_image
+                            val friendImageUrl = when {
+                                rawPath.isNullOrEmpty() -> ""
+                                rawPath.startsWith("http") -> rawPath
+                                else -> BASE_URL + rawPath
                             }
 
                             Friend(
                                 id = u.id.toString(),
-                                name = u.name ?: "Unknown",
+                                name = u.name ?: "Unknown Friend",
                                 email = u.email ?: "",
-                                status = "Online",
-                                imageUrl = friendImageUrl // Now Glide can load it
+                                status = "Offline",
+                                imageUrl = friendImageUrl
                             )
                         }
+
+                    Log.d("FRIEND_DEBUG", "Loaded ${mappedList.size} friends")
                     adapter.updateData(mappedList)
                 } else {
-                    Log.e("API_ERROR", "Code: ${response.code()} Body: ${response.errorBody()?.string()}")
+                    Log.e("API_ERROR", "Failed to load users: ${response.code()}")
                 }
             } catch (e: Exception) {
-                Log.e("NETWORK_ERROR", "Failed to fetch: ${e.message}")
+                Log.e("NETWORK_ERROR", "Check connection: ${e.message}")
             }
         }
     }

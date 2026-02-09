@@ -17,6 +17,6 @@ router.post('/register', upload.single('profile_image'), [
 ], registerUser);
 
 router.get('/users', getAllUsers);
-router.post('/login', loginUser);
+router.post('/login', logoutUser);
 
 export default router;

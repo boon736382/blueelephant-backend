@@ -13,6 +13,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // Test route (Check this in browser to see if server is alive)
 app.get('/', (req, res) => {

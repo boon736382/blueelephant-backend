@@ -1,5 +1,7 @@
 package com.pongsawad.blueelephant
 
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 
 class FriendAdapter(
     private var friends: List<Friend>,
@@ -28,14 +31,27 @@ class FriendAdapter(
     // 2. Logic to put data into the views
     override fun onBindViewHolder(holder: FriendViewHolder, position: Int) {
         val friend = friends[position]
-        holder.tvName.text = friend.name
-        holder.tvStatus.text = friend.status
+        holder.tvName.text = friend.name ?: "Unknown User"
 
-        // ✅ This is how images "Fully Work" on the internet
+        // --- DYNAMIC STATUS DOT ---
+        val statusDot = holder.itemView.findViewById<View>(R.id.view_status_dot)
+
+        if (friend.status.equals("Online", ignoreCase = true)) {
+            // Vibrant Green for Online
+            statusDot.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4CAF50"))
+            holder.tvStatus.text = "Online"
+        } else {
+            // Soft Gray for Offline
+            statusDot.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#9E9E9E"))
+            holder.tvStatus.text = "Offline"
+        }
+
+        // --- FAIL-SAFE IMAGE LOADING ---
         Glide.with(holder.itemView.context)
-            .load(friend.imageUrl) // The URL from your server/Firebase
-            .placeholder(R.drawable.ic_launcher_background) // Show this while loading
-            .circleCrop() // Makes it a nice circle
+            .load(friend.imageUrl)
+            .placeholder(R.drawable.ic_launcher_background)
+            .error(R.drawable.ic_default_avatar) // Use a silhouette icon
+            .circleCrop()
             .into(holder.ivAvatar)
 
         holder.itemView.setOnClickListener { onClick(friend) }
@@ -46,6 +62,6 @@ class FriendAdapter(
     inner class FriendViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.friendName)
         val ivAvatar: ImageView = itemView.findViewById(R.id.friendAvatar)
-        val tvStatus: TextView = itemView.findViewById(R.id.friendStatus)
+        val tvStatus: TextView = itemView.findViewById(R.id.view_status_dot)
     }
 }

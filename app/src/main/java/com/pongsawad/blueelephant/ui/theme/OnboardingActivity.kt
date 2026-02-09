@@ -102,6 +102,13 @@ class OnboardingActivity : AppCompatActivity() {
                 )
 
                 if (response.isSuccessful) {
+                    prefs.edit().apply {
+                        putBoolean("is_onboarding_complete", true)
+                        putString("user_name", name)   // Save the name you just typed
+                        putString("user_age", age)     // Save the age
+                        putString("user_gender", gender) // Save the gender
+                        apply()
+                    }
                     Toast.makeText(this@OnboardingActivity, "Success!", Toast.LENGTH_SHORT).show()
                     markCompleteAndNavigate()
                 } else {
