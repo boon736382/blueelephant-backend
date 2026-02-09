@@ -27,7 +27,9 @@
 
         <!-- Other activities -->
         <activity android:name=".ui.theme.FriendActivity" />
-        <activity android:name=".ui.theme.MainActivity"/>
+        <activity android:name=".ui.theme.MainActivity"
+            android:exported="false"
+            />
         <activity android:name=".LoginActivity"/>
         <activity android:name=".RegisterActivity"
             android:exported="true"/>

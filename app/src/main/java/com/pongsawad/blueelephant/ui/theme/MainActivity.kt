@@ -20,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // --- THE GATEKEEPER CHECK ---
+        val serverUrl = "https://blueelephant-backend.onrender.com/"
         val prefs = getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
         val isLoggedIn = prefs.getBoolean("IS_LOGGED_IN", false)
         val hasProfile = prefs.getBoolean("HAS_PROFILE", false)
