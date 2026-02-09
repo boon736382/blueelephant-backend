@@ -21,12 +21,14 @@ import java.io.File
 class OnboardingActivity : AppCompatActivity() {
 
     private var imageFile: File? = null
-    private val prefs by lazy { getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE) }
+    // Consistent preference key
+    private val PREFS_NAME = "APP_PREFS"
+    private val ONBOARDING_KEY = "is_onboarding_complete"
+    private val prefs by lazy { getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE) }
 
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             try {
-                // Creates a local copy of the image to send to your backend
                 val localFile = File(filesDir, "profile_upload.jpg")
                 contentResolver.openInputStream(uri)?.use { input ->
                     localFile.outputStream().use { output ->
@@ -43,9 +45,14 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_onboarding)
 
-        // NOTE: Firebase initialization removed here because we are going direct to API
+        // CHECK: If already complete, skip this activity entirely
+        if (prefs.getBoolean(ONBOARDING_KEY, false)) {
+            navigateToMain()
+            return
+        }
+
+        setContentView(R.layout.activity_onboarding)
 
         val genderGroup = findViewById<RadioGroup>(R.id.genderGroup)
         val ageInput = findViewById<EditText>(R.id.ageInput)
@@ -67,27 +74,24 @@ class OnboardingActivity : AppCompatActivity() {
             }
 
             submitBtn.isEnabled = false
-            submitBtn.text = "Sending to Server..."
+            submitBtn.text = "Sending..."
 
-            // DIRECT CALL: Skip Firebase, go straight to your Render Backend
             saveProfileToApi(name, age, gender, imageFile!!)
         }
     }
 
     private fun saveProfileToApi(name: String, age: String, gender: String, file: File) {
-        // 1. Prepare text parts (Matching your authController.js keys)
         val namePart = name.toRequestBody("text/plain".toMediaTypeOrNull())
         val agePart = age.toRequestBody("text/plain".toMediaTypeOrNull())
         val genderPart = gender.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        // Pulling saved registration info (or using defaults) to pass backend validator
+        // Ensure these match whatever you used during the actual Registration/Login step
         val email = prefs.getString("user_email", "test@example.com") ?: "test@example.com"
         val password = prefs.getString("user_password", "password123") ?: "password123"
 
         val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
         val passwordPart = password.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        // 2. Prepare the Image File part (Matching Multer's upload.single('profile_image'))
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
         val imagePart = MultipartBody.Part.createFormData("profile_image", file.name, requestFile)
 
@@ -98,30 +102,38 @@ class OnboardingActivity : AppCompatActivity() {
                 )
 
                 if (response.isSuccessful) {
-                    Toast.makeText(this@OnboardingActivity, "Profile Created Successfully!", Toast.LENGTH_SHORT).show()
-
-                    // 1. Save onboarding status so the user doesn't see this screen again
-                    prefs.edit().putBoolean("onboarding_complete", true).apply()
-                    // 2. Start the next Activity
-                    // Make sure "MainActivityChat" is the exact name of your class!
-                    val intent = Intent(this@OnboardingActivity, MainActivity::class.java)
-                    // 3. This flag clears the "Back Stack" so the user can't go back to Onboarding
-                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-
-                    startActivity(intent)
-                    finish() // Close OnboardingActivity
+                    Toast.makeText(this@OnboardingActivity, "Success!", Toast.LENGTH_SHORT).show()
+                    markCompleteAndNavigate()
                 } else {
-                    val errorLog = response.errorBody()?.string()
-                    Log.e("API_ERROR", "Status: ${response.code()} - $errorLog")
-                    Toast.makeText(this@OnboardingActivity, "Server Error: $errorLog", Toast.LENGTH_LONG).show()
-                    findViewById<Button>(R.id.submitBtn).isEnabled = true
-                    findViewById<Button>(R.id.submitBtn).text = "Submit"
+                    val errorBody = response.errorBody()?.string() ?: ""
+                    if (errorBody.contains("already registered")) {
+                        Toast.makeText(this@OnboardingActivity, "Account exists. Logging in...", Toast.LENGTH_SHORT).show()
+                        markCompleteAndNavigate()
+                    } else {
+                        findViewById<Button>(R.id.submitBtn).isEnabled = true
+                        findViewById<Button>(R.id.submitBtn).text = "Submit"
+                        Toast.makeText(this@OnboardingActivity, "Error: $errorBody", Toast.LENGTH_LONG).show()
+                    }
                 }
             } catch (e: Exception) {
-                Log.e("API_ERROR", "Connection failed: ${e.message}")
-                Toast.makeText(this@OnboardingActivity, "Check Internet / Server offline", Toast.LENGTH_SHORT).show()
+                Log.e("API_ERROR", "Failed: ${e.message}")
                 findViewById<Button>(R.id.submitBtn).isEnabled = true
+                findViewById<Button>(R.id.submitBtn).text = "Retry"
+                Toast.makeText(this@OnboardingActivity, "Server unreachable", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun markCompleteAndNavigate() {
+        prefs.edit().putBoolean(ONBOARDING_KEY, true).apply()
+        navigateToMain()
+    }
+
+    private fun navigateToMain() {
+        // Change "MainActivity" to "MainActivityChat" if that is your chat class name
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }
