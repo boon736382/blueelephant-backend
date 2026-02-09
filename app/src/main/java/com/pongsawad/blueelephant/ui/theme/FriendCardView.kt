@@ -24,7 +24,7 @@ class FriendCardView @JvmOverloads constructor(
 
         avatar = findViewById(R.id.friendAvatar)
         nameText = findViewById(R.id.friendName)
-        statusText = findViewById(R.id.friendStatus) // Ensure this ID exists in XML
+        statusText = findViewById(R.id.view_status_dot) // Ensure this ID exists in XML
     }
 
     fun bind(friend: Friend) {
