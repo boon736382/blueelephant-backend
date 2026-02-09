@@ -56,26 +56,33 @@ class LoginActivity : AppCompatActivity() {
                     val response = ApiClient.apiService.login(request)
 
                     withContext(Dispatchers.Main) {
+                        // Inside LoginActivity.kt
+
+                        // 1. Change the redirection logic in the success block
                         if (response.isSuccessful) {
                             val body = response.body()
 
-                            // Saving User Preferences
                             prefs.edit().apply {
                                 putBoolean("IS_LOGGED_IN", true)
+                                // Store email/password so Onboarding can use them for the registration call
+                                putString("user_email", email)
+                                putString("user_password", password)
                                 body?.token?.let { putString("USER_TOKEN", it) }
                                 apply()
                             }
 
-                            val hasProfile = prefs.getBoolean("HAS_PROFILE", false)
-                            val nextActivity = if (hasProfile) MainActivity::class.java else OnboardingActivity::class.java
+                            // Use the SAME key we used in Splash and Onboarding
+                            val isOnboardingDone = prefs.getBoolean("is_onboarding_complete", false)
+                            val nextActivity = if (isOnboardingDone) {
+                                MainActivity::class.java
+                            } else {
+                                OnboardingActivity::class.java
+                            }
 
-                            startActivity(Intent(this@LoginActivity, nextActivity))
+                            val intent = Intent(this@LoginActivity, nextActivity)
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            startActivity(intent)
                             finish()
-                        } else {
-                            loginBtn.isEnabled = true
-                            loginBtn.text = "Login"
-                            // If backend is working correctly, this will show the message from your JS controller
-                            Toast.makeText(this@LoginActivity, "Login Failed: Check Email/Password", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {
