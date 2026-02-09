@@ -18,27 +18,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // --- THE GATEKEEPER CHECK ---
-        val serverUrl = "https://blueelephant-backend.onrender.com/"
-        val prefs = getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
-        val isLoggedIn = prefs.getBoolean("IS_LOGGED_IN", false)
-        val hasProfile = prefs.getBoolean("HAS_PROFILE", false)
-
-        if (!isLoggedIn) {
-            // User hasn't logged in yet
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-            return
-        } else if (!hasProfile) {
-            // Logged in but never finished onboarding (photo/age/gender)
-            startActivity(Intent(this, OnboardingActivity::class.java))
-            finish()
-            return
-        }
-        // ----------------------------
-
         setContentView(R.layout.activity_main_chat)
+
+        val prefs = getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
 
         // Initialize Buttons
         friendBtn = findViewById(R.id.friendBtn)
@@ -46,30 +28,25 @@ class MainActivity : AppCompatActivity() {
         logoutBtn = findViewById(R.id.logoutBtn)
         exitBtn = findViewById(R.id.exitBtn)
 
-        // Navigation: Friends List
+        // Navigation: Go to FriendActivity
         friendBtn.setOnClickListener {
-            startActivity(Intent(this, FriendActivity::class.java))
+            val intent = Intent(this, FriendActivity::class.java)
+            startActivity(intent)
         }
 
-        // Navigation: Swipe Profiles
         swipeBtn.setOnClickListener {
-            Toast.makeText(this, "Opening Swipe...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Swipe Feature Coming Soon!", Toast.LENGTH_SHORT).show()
         }
 
-        // Logout Logic
         logoutBtn.setOnClickListener {
-            // Clears everything: Token, Profile Flag, Image Path, etc.
+            // Logout and clear session
             prefs.edit().clear().apply()
-
             val intent = Intent(this, LoginActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
             finish()
-
-            Toast.makeText(this, "Logged Out", Toast.LENGTH_SHORT).show()
         }
 
-        // Exit App
         exitBtn.setOnClickListener {
             finishAffinity()
         }
