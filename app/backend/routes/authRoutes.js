@@ -2,7 +2,7 @@ import express from 'express';
 import { body } from 'express-validator';
 // Add loginUser to the curly braces
 import multer from 'multer'; // 👈 Add this
-import { registerUser, getAllUsers, loginUser } from '../controllers/authController.js';
+import { registerUser, loginUser, getAllUsers, updateProfile } from'../controllers/authController.js';
 
 
 const upload = multer({ dest: 'uploads/' });
