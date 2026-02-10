@@ -62,46 +62,52 @@ class LoginActivity : AppCompatActivity() {
                         // 1. Change the redirection logic in the success block
                         if (response.isSuccessful) {
                             val body = response.body()
-                            val user = body?.user // Extract the user object from the response
+                            val user = body?.user
 
+                            // Use ONE editor for the entire transaction
                             prefs.edit().apply {
+                                // 1. Session State
                                 putBoolean("IS_LOGGED_IN", true)
+                                putString("USER_TOKEN", body?.token)
 
-                                // --- THE FIX: Save all user details ---
+                                // 2. User Credentials (Keep for Onboarding/Re-auth)
+                                putString("user_email", email)
+                                putString("user_password", password)
+
+                                // 3. Profile Details from PostgreSQL
                                 putString("user_name", user?.name)
-                                putString("user_age", user?.age?.toString()) // Convert Int to String
+                                putString("user_age", user?.age?.toString())
                                 putString("user_gender", user?.gender)
                                 putString("user_photo_path", user?.profile_image)
-                                putString("user_email", email)
 
-                                body?.token?.let { putString("USER_TOKEN", it) }
-                                apply()
+                                // 4. Smart Onboarding Check
+                                // If the name is null, empty, or still the default "New User", force onboarding
+                                val isReallyComplete = !user?.name.isNullOrEmpty() && user?.name != "New User"
+                                putBoolean("is_onboarding_complete", isReallyComplete)
+
+                                apply() // Save everything at once
                             }
 
-                            // Check if onboarding is complete
-                            // Note: If the user already has a name and age from the server,
-                            // you might want to force this to 'true' automatically.
-                            val isOnboardingDone = prefs.getBoolean("is_onboarding_complete", false) || !user?.name.isNullOrEmpty()
-
-                            if (!user?.name.isNullOrEmpty()) {
-                                prefs.edit().putBoolean("is_onboarding_complete", true).apply()
-                            }
-
-                            val nextActivity = if (prefs.getBoolean("is_onboarding_complete", false)) {
-                                MainActivity::class.java
-                            } else {
-                                OnboardingActivity::class.java
-                            }
+                            // Determine the next screen based on the value we just saved
+                            val isDone = prefs.getBoolean("is_onboarding_complete", false)
+                            val nextActivity = if (isDone) MainActivity::class.java else OnboardingActivity::class.java
 
                             val intent = Intent(this@LoginActivity, nextActivity)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                             startActivity(intent)
                             finish()
+
                         } else {
-                            // Handle wrong password/email
+                            // Handling specific error feedback
                             loginBtn.isEnabled = true
                             loginBtn.text = "Login"
-                            Toast.makeText(this@LoginActivity, "Invalid Login Credentials", Toast.LENGTH_SHORT).show()
+                            val errorBody = response.errorBody()?.string() ?: ""
+
+                            if (errorBody.contains("Invalid")) {
+                                Toast.makeText(this@LoginActivity, "Wrong email or password", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(this@LoginActivity, "Login Failed: $errorBody", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     }
                 } catch (e: Exception) {
