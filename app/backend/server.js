@@ -1,13 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { Server } from 'socket.io';
 import http from 'http';
 
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import './config/db.js';
-import { Server } from 'socket.io';
+// Rename it to 'SocketServer' to avoid the conflict
+import { Server as SocketServer } from 'socket.io';
 import cron from 'node-cron';
 const io = new Server(server, { cors: { origin: "*" } });
 
