@@ -2,26 +2,28 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import http from 'http';
+import { Server as SocketServer } from 'socket.io'; // 1. Renamed import
+import cron from 'node-cron';
 
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
-import './config/db.js';
-// Rename it to 'SocketServer' to avoid the conflict
-import { Server as SocketServer } from 'socket.io';
-import cron from 'node-cron';
-const io = new Server(server, { cors: { origin: "*" } });
+import pool from './config/db.js'; // Ensure pool is imported for cron jobs
 
 dotenv.config();
-
 const app = express();
 
+// 2. Create the HTTP server FIRST
 const server = http.createServer(app);
-const io = new Server(server, {
+
+// 3. Initialize Socket.io using the NEW name 'SocketServer'
+const io = new SocketServer(server, {
   cors: {
-    origin: "*", // Allows your Android app to connect
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
+
+// Remove those two duplicate/broken 'const io' lines you had at the top!
 
 
 cron.schedule('*/30 * * * *', async () => {
@@ -36,17 +38,6 @@ cron.schedule('*/30 * * * *', async () => {
     }
 });
 
-cron.schedule('0 * * * *', async () => {
-    console.log("Cleaning up old messages...");
-    try {
-        await pool.query(
-            "DELETE FROM messages WHERE created_at < NOW() - INTERVAL '24 hours'"
-        );
-        console.log("Expired messages deleted.");
-    } catch (err) {
-        console.error("Cleanup error:", err);
-    }
-});
 
 
 io.on('connection', (socket) => {
