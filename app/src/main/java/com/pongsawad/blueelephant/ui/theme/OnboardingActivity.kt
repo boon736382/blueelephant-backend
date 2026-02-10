@@ -16,6 +16,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.RequestBody
 import java.io.File
 
 class OnboardingActivity : AppCompatActivity() {
@@ -102,24 +103,43 @@ class OnboardingActivity : AppCompatActivity() {
                 )
 
                 if (response.isSuccessful) {
+                    val body = response.body()
+                    // Extract user data from the response body
+                    val serverUser = body?.user
+
                     prefs.edit().apply {
                         putBoolean("is_onboarding_complete", true)
-                        putString("user_name", name)   // Save the name you just typed
-                        putString("user_age", age)     // Save the age
-                        putString("user_gender", gender) // Save the gender
+                        putString("user_name", name)
+                        putString("user_age", age)
+                        putString("user_gender", gender)
+
+                        // --- THE FIX FOR WHITE IMAGES ---
+                        // Save the image path returned by the server.
+                        // If the server didn't return one, we fall back to what we know.
+                        val remotePath = serverUser?.profile_image
+                        putString("user_photo_path", remotePath)
+
                         apply()
                     }
-                    Toast.makeText(this@OnboardingActivity, "Success!", Toast.LENGTH_SHORT).show()
+
+                    // Log it so you can see the path in Logcat
+                    android.util.Log.d("ONBOARDING", "Saved Photo Path: ${serverUser?.profile_image}")
+
+                    Toast.makeText(this@OnboardingActivity, "Profile Created Successfully!", Toast.LENGTH_SHORT).show()
                     markCompleteAndNavigate()
                 } else {
                     val errorBody = response.errorBody()?.string() ?: ""
+
+                    // Reset the UI so the user can try again
+                    findViewById<Button>(R.id.submitBtn).isEnabled = true
+                    findViewById<Button>(R.id.submitBtn).text = "Submit"
+
                     if (errorBody.contains("already registered")) {
-                        Toast.makeText(this@OnboardingActivity, "Account exists. Logging in...", Toast.LENGTH_SHORT).show()
+                        // If the user somehow exists but profile was incomplete, just move them forward
+                        Toast.makeText(this@OnboardingActivity, "Welcome back!", Toast.LENGTH_SHORT).show()
                         markCompleteAndNavigate()
                     } else {
-                        findViewById<Button>(R.id.submitBtn).isEnabled = true
-                        findViewById<Button>(R.id.submitBtn).text = "Submit"
-                        Toast.makeText(this@OnboardingActivity, "Error: $errorBody", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@OnboardingActivity, "Upload Failed: $errorBody", Toast.LENGTH_LONG).show()
                     }
                 }
             } catch (e: Exception) {

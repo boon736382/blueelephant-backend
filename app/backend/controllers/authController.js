@@ -3,6 +3,34 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { validationResult } from 'express-validator';
 
+export const updateProfile = async (req, res) => {
+    const { email, name, age, gender } = req.body;
+    const profile_image = req.file ? req.file.path : null;
+
+    try {
+        // Update existing user instead of trying to INSERT a new one
+        const updatedUser = await pool.query(
+            `UPDATE users
+             SET name = $1, age = $2, gender = $3, profile_image = COALESCE($4, profile_image), status = 'Online'
+             WHERE email = $5
+             RETURNING id, name, email, age, gender, profile_image, status`,
+            [name, age, gender, profile_image, email]
+        );
+
+        if (updatedUser.rows.length === 0) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        res.json({
+            success: true,
+            message: "Profile updated!",
+            user: updatedUser.rows[0]
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+};
+
 export const registerUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

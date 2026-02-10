@@ -31,7 +31,7 @@ interface ApiService {
         @Part("age") age: RequestBody,
         @Part("gender") gender: RequestBody,
         @Part profile_image: MultipartBody.Part
-    ): Response<SimpleResponse>
+    ): Response<RegisterResponse>
 
 }
 

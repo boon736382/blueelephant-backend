@@ -140,6 +140,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="4dp"
         android:padding="4dp"
+        android:background="#F5F5F5"
         app:layout_constraintTop_toBottomOf="@id/allFriendsLabel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -32,21 +32,24 @@ class FriendAdapter(
         holder.tvName.text = friend.name ?: "Unknown User"
         holder.tvStatusText.text = friend.status ?: "Offline"
 
-        // --- DYNAMIC STATUS DOT LOGIC ---
-        val statusColor = if (friend.status.equals("Online", ignoreCase = true)) {
-            "#4CAF50" // Green
-        } else {
-            "#9E9E9E" // Gray
-        }
-
+        // --- STATUS DOT ---
+        val statusColor = if (friend.status.equals("Online", ignoreCase = true)) "#4CAF50" else "#9E9E9E"
         holder.viewStatusDot.backgroundTintList = ColorStateList.valueOf(Color.parseColor(statusColor))
 
-        // --- IMAGE LOADING ---
+        // --- FIXED IMAGE LOADING ---
+        val baseUrl = "https://blueelephant-backend.onrender.com/"
+        val finalUrl = if (friend.imageUrl?.startsWith("http") == true) {
+            friend.imageUrl
+        } else {
+            baseUrl + friend.imageUrl
+        }
+        android.util.Log.d("DEBUG_IMAGE", "Loading URL: $finalUrl")
+
         Glide.with(holder.itemView.context)
-            .load(friend.imageUrl)
+            .load(finalUrl)
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .placeholder(R.drawable.ic_launcher_background)
-            .error(R.drawable.ic_launcher_foreground)
+            .error(R.drawable.ic_launcher_foreground) // If this shows up, URL is 404
             .circleCrop()
             .into(holder.ivAvatar)
 

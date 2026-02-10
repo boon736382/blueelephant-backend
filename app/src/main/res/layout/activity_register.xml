@@ -82,17 +82,5 @@
         android:textColor="#2E7D32"
         android:textSize="14sp"
         android:textStyle="bold" />
-    <Button
-        android:id="@+id/selectImageBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select Profile Image"
-        android:layout_marginBottom="16dp"/>
-    <ImageView
-        android:id="@+id/profilePreview"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:scaleType="centerCrop"
-        android:src="@android:drawable/ic_menu_gallery" />
 
 </LinearLayout>
