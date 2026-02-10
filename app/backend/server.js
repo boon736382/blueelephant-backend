@@ -29,12 +29,20 @@ app.use('/api/chat', chatRoutes);
 app.get('/debug-routes', (req, res) => {
     const routes = [];
     app._router.stack.forEach((middleware) => {
-        if (middleware.route) { // routes registered directly on the app
+        if (middleware.route) {
             routes.push(`${Object.keys(middleware.route.methods)} ${middleware.route.path}`);
-        } else if (middleware.name === 'router') { // router middleware
+        } else if (middleware.name === 'router') {
+            // This part now captures the prefix (like /api/auth)
+            const prefix = middleware.regexp.toString()
+                .replace('/^\\', '')
+                .replace('\\/?(?=\\/|$)/i', '')
+                .replace(/\\/g, '');
+
             middleware.handle.stack.forEach((handler) => {
-                const path = handler.route ? handler.route.path : '??';
-                routes.push(`NESTED: ${path}`);
+                if (handler.route) {
+                    const path = handler.route.path;
+                    routes.push(`${Object.keys(handler.route.methods)} ${prefix}${path}`);
+                }
             });
         }
     });

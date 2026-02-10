@@ -87,12 +87,20 @@ class OnboardingActivity : AppCompatActivity() {
         val genderPart = gender.toRequestBody("text/plain".toMediaTypeOrNull())
 
         // Use the email saved during Login/Register
-        val email = prefs.getString("user_email", "") ?: ""
+        val email = prefs.getString("user_email", "")?.trim()?.lowercase() ?: ""
         val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
 
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
         // Ensure "profile_image" matches the key in your Node.js upload.single('profile_image')
         val imagePart = MultipartBody.Part.createFormData("profile_image", file.name, requestFile)
+
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, com.pongsawad.blueelephant.LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
 
         lifecycleScope.launch {
             try {

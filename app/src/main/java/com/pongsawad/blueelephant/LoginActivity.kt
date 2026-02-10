@@ -40,7 +40,7 @@ class LoginActivity : AppCompatActivity() {
         }
 
         loginBtn.setOnClickListener {
-            val email = emailBox.text.toString().trim()
+            val email = emailBox.text.toString().trim().lowercase() // Add .lowercase()
             val password = passwordBox.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
