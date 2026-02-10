@@ -86,69 +86,58 @@ class OnboardingActivity : AppCompatActivity() {
         val agePart = age.toRequestBody("text/plain".toMediaTypeOrNull())
         val genderPart = gender.toRequestBody("text/plain".toMediaTypeOrNull())
 
-        // Ensure these match whatever you used during the actual Registration/Login step
-        val email = prefs.getString("user_email", "test@example.com") ?: "test@example.com"
-        val password = prefs.getString("user_password", "password123") ?: "password123"
-
+        // Use the email saved during Login/Register
+        val email = prefs.getString("user_email", "") ?: ""
         val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
-        val passwordPart = password.toRequestBody("text/plain".toMediaTypeOrNull())
 
         val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+        // Ensure "profile_image" matches the key in your Node.js upload.single('profile_image')
         val imagePart = MultipartBody.Part.createFormData("profile_image", file.name, requestFile)
 
         lifecycleScope.launch {
             try {
-                val response = ApiClient.apiService.uploadProfile(
-                    emailPart, passwordPart, namePart, agePart, genderPart, imagePart
+                // --- FIX: Change uploadProfile to updateProfile ---
+                val response = ApiClient.apiService.updateProfile(
+                    emailPart, namePart, agePart, genderPart, imagePart
                 )
 
                 if (response.isSuccessful) {
                     val body = response.body()
-                    // Extract user data from the response body
                     val serverUser = body?.user
 
                     prefs.edit().apply {
-                        putBoolean("is_onboarding_complete", true)
+                        putBoolean(ONBOARDING_KEY, true)
                         putString("user_name", name)
                         putString("user_age", age)
                         putString("user_gender", gender)
 
-                        // --- THE FIX FOR WHITE IMAGES ---
-                        // Save the image path returned by the server.
-                        // If the server didn't return one, we fall back to what we know.
-                        val remotePath = serverUser?.profile_image
-                        putString("user_photo_path", remotePath)
-
+                        // Save the real URL/Path returned by Render
+                        putString("user_photo_path", serverUser?.profile_image)
                         apply()
                     }
 
-                    // Log it so you can see the path in Logcat
-                    android.util.Log.d("ONBOARDING", "Saved Photo Path: ${serverUser?.profile_image}")
-
-                    Toast.makeText(this@OnboardingActivity, "Profile Created Successfully!", Toast.LENGTH_SHORT).show()
-                    markCompleteAndNavigate()
+                    Log.d("ONBOARDING", "Profile updated. Image: ${serverUser?.profile_image}")
+                    Toast.makeText(this@OnboardingActivity, "Profile Updated!", Toast.LENGTH_SHORT).show()
+                    navigateToMain()
                 } else {
-                    val errorBody = response.errorBody()?.string() ?: ""
+                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+                    Log.e("ONBOARDING_FAIL", errorBody)
 
-                    // Reset the UI so the user can try again
-                    findViewById<Button>(R.id.submitBtn).isEnabled = true
-                    findViewById<Button>(R.id.submitBtn).text = "Submit"
-
-                    if (errorBody.contains("already registered")) {
-                        // If the user somehow exists but profile was incomplete, just move them forward
-                        Toast.makeText(this@OnboardingActivity, "Welcome back!", Toast.LENGTH_SHORT).show()
-                        markCompleteAndNavigate()
-                    } else {
-                        Toast.makeText(this@OnboardingActivity, "Upload Failed: $errorBody", Toast.LENGTH_LONG).show()
-                    }
+                    resetButton()
+                    Toast.makeText(this@OnboardingActivity, "Update Failed: $errorBody", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 Log.e("API_ERROR", "Failed: ${e.message}")
-                findViewById<Button>(R.id.submitBtn).isEnabled = true
-                findViewById<Button>(R.id.submitBtn).text = "Retry"
+                resetButton()
                 Toast.makeText(this@OnboardingActivity, "Server unreachable", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun resetButton() {
+        val submitBtn = findViewById<Button>(R.id.submitBtn)
+        submitBtn.isEnabled = true
+        submitBtn.text = "Submit"
     }
 
     private fun markCompleteAndNavigate() {
