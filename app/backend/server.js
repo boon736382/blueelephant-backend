@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { Server } from 'socket.io';
+import http from 'http';
 
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
@@ -12,6 +14,15 @@ const io = new Server(server, { cors: { origin: "*" } });
 dotenv.config();
 
 const app = express();
+
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allows your Android app to connect
+    methods: ["GET", "POST"]
+  }
+});
+
 
 cron.schedule('*/30 * * * *', async () => {
     console.log("Purging messages older than 24 hours...");
