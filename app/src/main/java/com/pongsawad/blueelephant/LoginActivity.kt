@@ -1,5 +1,6 @@
 package com.pongsawad.blueelephant
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -61,19 +62,32 @@ class LoginActivity : AppCompatActivity() {
                         // 1. Change the redirection logic in the success block
                         if (response.isSuccessful) {
                             val body = response.body()
+                            val user = body?.user // Extract the user object from the response
 
                             prefs.edit().apply {
                                 putBoolean("IS_LOGGED_IN", true)
-                                // Store email/password so Onboarding can use them for the registration call
+
+                                // --- THE FIX: Save all user details ---
+                                putString("user_name", user?.name)
+                                putString("user_age", user?.age?.toString()) // Convert Int to String
+                                putString("user_gender", user?.gender)
+                                putString("user_photo_path", user?.profile_image)
                                 putString("user_email", email)
-                                putString("user_password", password)
+
                                 body?.token?.let { putString("USER_TOKEN", it) }
                                 apply()
                             }
 
-                            // Use the SAME key we used in Splash and Onboarding
-                            val isOnboardingDone = prefs.getBoolean("is_onboarding_complete", false)
-                            val nextActivity = if (isOnboardingDone) {
+                            // Check if onboarding is complete
+                            // Note: If the user already has a name and age from the server,
+                            // you might want to force this to 'true' automatically.
+                            val isOnboardingDone = prefs.getBoolean("is_onboarding_complete", false) || !user?.name.isNullOrEmpty()
+
+                            if (!user?.name.isNullOrEmpty()) {
+                                prefs.edit().putBoolean("is_onboarding_complete", true).apply()
+                            }
+
+                            val nextActivity = if (prefs.getBoolean("is_onboarding_complete", false)) {
                                 MainActivity::class.java
                             } else {
                                 OnboardingActivity::class.java
@@ -83,6 +97,11 @@ class LoginActivity : AppCompatActivity() {
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                             startActivity(intent)
                             finish()
+                        } else {
+                            // Handle wrong password/email
+                            loginBtn.isEnabled = true
+                            loginBtn.text = "Login"
+                            Toast.makeText(this@LoginActivity, "Invalid Login Credentials", Toast.LENGTH_SHORT).show()
                         }
                     }
                 } catch (e: Exception) {

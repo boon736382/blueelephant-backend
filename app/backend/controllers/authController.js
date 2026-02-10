@@ -87,20 +87,18 @@ export const loginUser = async (req, res) => {
             { expiresIn: '1d' }
         );
 
-        res.json({
-            message: "Login successful!",
-            token,
-            // --- FIXED: Sending full user info so Android SharedPreferences can save it ---
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                age: user.age,
-                gender: user.gender,
-                profile_image: user.profile_image,
-                status: 'Online'
-            }
-        });
+       res.json({
+           message: "Login successful!",
+           token,
+           user: {
+               id: user.id,
+               name: user.name,
+               email: user.email,
+               age: user.age,          // Add this!
+               gender: user.gender,    // Add this!
+               profile_image: user.profile_image // Add this!
+           }
+       });
 
     } catch (err) {
         console.error(err.message);
