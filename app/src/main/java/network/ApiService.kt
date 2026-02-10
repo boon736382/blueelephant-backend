@@ -1,5 +1,6 @@
 package com.pongsawad.blueelephant.network
 
+import com.pongsawad.blueelephant.ChatMessage
 import com.pongsawad.blueelephant.Friend
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -9,6 +10,7 @@ import retrofit2.http.POST
 import retrofit2.Response // Make sure to import this!
 import retrofit2.http.Multipart
 import retrofit2.http.Part
+import retrofit2.http.Path
 
 interface ApiService {
 
@@ -34,5 +36,14 @@ interface ApiService {
     // 4. Fetch Users (For your Friend list)
     @GET("api/auth/users")
     suspend fun getAllUsers(): Response<List<UserData>>
+
+    @POST("api/chat/send")
+    suspend fun sendMessage(@Body request: MessageRequest): Response<Unit>
+
+    @GET("api/chat/{user1}/{user2}")
+    suspend fun getMessages(
+        @Path("user1") user1: String,
+        @Path("user2") user2: String
+    ): Response<List<ChatMessage>>
 }
 

@@ -5,10 +5,47 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import './config/db.js';
+import { Server } from 'socket.io';
+import cron from 'node-cron';
+const io = new Server(server, { cors: { origin: "*" } });
 
 dotenv.config();
 
 const app = express();
+
+cron.schedule('*/30 * * * *', async () => {
+    console.log("Purging messages older than 24 hours...");
+    try {
+        const result = await pool.query(
+            "DELETE FROM messages WHERE created_at < NOW() - INTERVAL '24 hours'"
+        );
+        console.log(`Cleanup complete. Deleted ${result.rowCount} expired messages.`);
+    } catch (err) {
+        console.error("Cleanup job failed:", err);
+    }
+});
+
+cron.schedule('0 * * * *', async () => {
+    console.log("Cleaning up old messages...");
+    try {
+        await pool.query(
+            "DELETE FROM messages WHERE created_at < NOW() - INTERVAL '24 hours'"
+        );
+        console.log("Expired messages deleted.");
+    } catch (err) {
+        console.error("Cleanup error:", err);
+    }
+});
+
+
+io.on('connection', (socket) => {
+    socket.on('join_room', (roomId) => socket.join(roomId));
+
+    socket.on('send_message', (data) => {
+        // Broadcast message to the specific room instantly
+        io.to(data.roomId).emit('receive_message', data);
+    });
+});
 
 // Middleware
 app.use(cors());
