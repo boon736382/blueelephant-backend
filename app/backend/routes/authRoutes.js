@@ -16,6 +16,7 @@ router.post('/register', upload.single('profile_image'), [
     body('gender').notEmpty().withMessage('Gender is required') // 👈 Add this
 ], registerUser);
 
+router.post('/update-profile', upload.single('profile_image'), updateProfile); // Add this!
 router.get('/users', getAllUsers);
 router.post('/login', loginUser);
 

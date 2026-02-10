@@ -12,7 +12,6 @@ import retrofit2.http.Part
 
 interface ApiService {
 
-    // Remove "api/auth/" because the server already adds it
     @POST("api/auth/register")
     suspend fun register(@Body request: RegisterRequest): Response<RegisterResponse>
 
@@ -22,6 +21,18 @@ interface ApiService {
     @POST("api/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
+    // --- NEW: This is for the Onboarding screen ---
+    @Multipart
+    @POST("api/auth/update-profile")
+    suspend fun updateProfile(
+        @Part("email") email: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part("age") age: RequestBody,
+        @Part("gender") gender: RequestBody,
+        @Part profile_image: MultipartBody.Part // Matches your backend 'profile_image'
+    ): Response<RegisterResponse>
+
+    // Keep this only if you want to upload everything at once during signup
     @Multipart
     @POST("api/auth/register")
     suspend fun uploadProfile(
@@ -32,6 +43,5 @@ interface ApiService {
         @Part("gender") gender: RequestBody,
         @Part profile_image: MultipartBody.Part
     ): Response<RegisterResponse>
-
 }
 
