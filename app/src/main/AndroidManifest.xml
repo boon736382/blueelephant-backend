@@ -34,7 +34,9 @@
         <activity android:name=".RegisterActivity"
             android:exported="true"/>
         <activity android:name=".ui.theme.OnboardingActivity"/>
-        <activity android:name=".ChatRoomActivity" />
+        <activity android:name=".ChatRoomActivity"
+            android:exported="false"
+            />
         <activity android:name=".ui.theme.ChatActivity" />
 
 

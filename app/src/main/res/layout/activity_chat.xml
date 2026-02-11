@@ -2,44 +2,40 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2E2E2E">
+    android:background="#121212"> <LinearLayout
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:background="#3F51B5"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp">
 
-    <LinearLayout
-        android:id="@+id/header"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#3F51B5"
-        android:gravity="center_vertical"
-        android:padding="16dp">
+    <TextView
+        android:id="@+id/tv_chat_partner_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Elephant Bot"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tv_chat_partner_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Friend Name"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/btnTranslate"
-            android:layout_width="wrap_content"
-            android:layout_height="35dp"
-            android:text="EN/TH"
-            android:textSize="10sp"
-            android:backgroundTint="#303F9F"
-            android:textColor="#FFFFFF" />
-    </LinearLayout>
+    <Button
+        android:id="@+id/btnTranslate"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:text="EN/TH"
+        android:textSize="10sp"
+        android:backgroundTint="#303F9F"
+        android:textColor="#FFFFFF" />
+</LinearLayout>
 
     <LinearLayout
         android:id="@+id/inputBarContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="12dp"
-        android:background="@android:color/white"
-        android:elevation="8dp"
+        android:background="#1E1E1E" android:elevation="8dp"
         android:orientation="horizontal"
         android:padding="8dp">
 
@@ -48,15 +44,18 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="@string/hint_type_message"
-            android:textColor="#000000"
-            android:textColorHint="#888888" />
+            android:hint="Type a message..."
+            android:textColor="#FFFFFF"
+            android:textColorHint="#AAAAAA"
+            android:background="@android:color/transparent"
+            android:padding="10dp" />
 
         <Button
             android:id="@+id/sendBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/btn_send"
+            android:text="Send"
+            android:backgroundTint="#3F51B5"
             android:textColor="#FFFFFF" />
     </LinearLayout>
 
@@ -66,6 +65,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/inputBarContainer"
         android:layout_below="@id/header"
+        android:clipToPadding="false"
         android:padding="8dp" />
 
 </RelativeLayout>
