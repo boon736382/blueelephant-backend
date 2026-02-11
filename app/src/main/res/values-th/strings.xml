@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">บลูเอเลแฟนท์</string>
+    <string name="label_online">ออนไลน์</string>
+    <string name="hint_msg">พิมพ์ข้อความ...</string>
+    <string name="btn_send">ส่ง</string>
+    <string name="toast_msg_sent">ส่งข้อความแล้ว</string>
+    <string name="toast_login_success">เข้าสู่ระบบสำเร็จ</string>
+    <string name="title_friends">เพื่อนของฉัน</string>
+    <string name="search_friends">ค้นหาเพื่อน...</string>
+    <string name="no_friends">ไม่พบรายชื่อเพื่อน</string>
+    <string name="btn_logout">ออกจากระบบ</string>
+    <string name="hint_type_message">พิมพ์ข้อความ...</string>
+    <string name="label_offline">ออฟไลน์</string>
+    <string name="delete_notice">ข้อความจะถูกลบหลังจาก 24 ชม.</string>
+    <string name="btn_back">กลับ</string>
+    <string name="loading">กำลังโหลด...</string>
+    <string name="title_login">ยินดีต้อนรับกลับมา</string>
+    <string name="title_register">สร้างบัญชีใหม่</string>
+    <string name="hint_email">อีเมล</string>
+    <string name="hint_password">รหัสผ่าน</string>
+    <string name="hint_name">ชื่อ-นามสกุล</string>
+    <string name="btn_login">เข้าสู่ระบบ</string>
+    <string name="btn_signup">ลงทะเบียน</string>
+    <string name="error_invalid">อีเมลหรือรหัสผ่านไม่ถูกต้อง</string>
+</resources>

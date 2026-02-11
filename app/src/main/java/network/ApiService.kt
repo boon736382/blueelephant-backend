@@ -40,10 +40,10 @@ interface ApiService {
     @POST("api/chat/send")
     suspend fun sendMessage(@Body request: MessageRequest): Response<Unit>
 
-    @GET("api/chat/{user1}/{user2}")
+    @GET("api/chat/messages/{sender}/{receiver}") // Added 'api/chat/' prefix
     suspend fun getMessages(
-        @Path("user1") user1: String,
-        @Path("user2") user2: String
+        @Path("sender") sender: String,
+        @Path("receiver") receiver: String
     ): Response<List<ChatMessage>>
 }
 

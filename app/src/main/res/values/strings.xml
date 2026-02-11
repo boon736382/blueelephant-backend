@@ -1,3 +1,25 @@
 <resources>
     <string name="app_name">Blueelephant</string>
+    <string name="label_online">Online</string>
+    <string name="hint_msg">Type a message...</string>
+    <string name="btn_send">Send</string>
+    <string name="toast_msg_sent">Message Sent</string>
+    <string name="toast_login_success">Login Successful</string>
+    <string name="title_friends">My Friends</string>
+    <string name="search_friends">Search friends...</string>
+    <string name="no_friends">No friends found</string>
+    <string name="btn_logout">Logout</string>
+    <string name="hint_type_message">Type a message...</string>
+    <string name="label_offline">Offline</string>
+    <string name="delete_notice">Messages disappear after 24h</string>
+    <string name="btn_back">Back</string>
+    <string name="loading">Loading...</string>
+    <string name="title_login">Welcome Back</string>
+    <string name="title_register">Create Account</string>
+    <string name="hint_email">Email Address</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_name">Full Name</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_signup">Sign Up</string>
+    <string name="error_invalid">Invalid email or password</string>
 </resources>

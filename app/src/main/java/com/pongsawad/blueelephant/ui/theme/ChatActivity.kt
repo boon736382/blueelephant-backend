@@ -7,10 +7,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.pongsawad.blueelephant.BaseActivity // Import your new engine
 import com.pongsawad.blueelephant.ChatAdapter
 import com.pongsawad.blueelephant.ChatMessage
 import com.pongsawad.blueelephant.R
@@ -18,14 +18,16 @@ import com.pongsawad.blueelephant.network.ApiClient
 import com.pongsawad.blueelephant.network.MessageRequest
 import kotlinx.coroutines.launch
 
-class ChatActivity : AppCompatActivity() {
+// Inherit from BaseActivity to enable the language engine
+class ChatActivity : BaseActivity() {
 
     private lateinit var chatRecycler: RecyclerView
     private lateinit var inputMessage: EditText
     private lateinit var sendBtn: Button
     private lateinit var tvTitle: TextView
-    private val messages = mutableListOf<ChatMessage>()
+    private lateinit var btnTranslate: Button
 
+    private val messages = mutableListOf<ChatMessage>()
     private var receiverEmail: String = ""
     private lateinit var adapter: ChatAdapter
 
@@ -33,7 +35,7 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chat)
 
-        // 1. Get data from Intent
+        // 1. Get Intent Data
         receiverEmail = intent.getStringExtra("RECEIVER_EMAIL") ?: ""
         val friendName = intent.getStringExtra("FRIEND_NAME") ?: "Friend"
 
@@ -42,28 +44,41 @@ class ChatActivity : AppCompatActivity() {
         inputMessage = findViewById(R.id.messageInput)
         sendBtn = findViewById(R.id.sendBtn)
         tvTitle = findViewById(R.id.tv_chat_partner_name)
+        btnTranslate = findViewById(R.id.btnTranslate)
 
         tvTitle.text = friendName
 
         // 3. Setup RecyclerView
-        // FIX: You MUST pass your own email here to fix the red line!
         val prefs = getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
         val myEmail = prefs.getString("user_email", "") ?: ""
 
-        adapter = ChatAdapter(messages, myEmail) // Now matches the new constructor
+        adapter = ChatAdapter(messages, myEmail)
         chatRecycler.adapter = adapter
-
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.stackFromEnd = true
-        chatRecycler.layoutManager = layoutManager
-
-        // 4. Button Logic
-        sendBtn.setOnClickListener {
-            sendMessage()
+        chatRecycler.layoutManager = LinearLayoutManager(this).apply {
+            stackFromEnd = true
         }
 
-        // 5. Load History
+        // 4. Listeners
+        sendBtn.setOnClickListener { sendMessage() }
+
+        btnTranslate.setOnClickListener { toggleLanguage() }
+
+        // 5. Load Data
         fetchMessages()
+    }
+
+    private fun toggleLanguage() {
+        val prefs = getSharedPreferences("SETTINGS", Context.MODE_PRIVATE)
+        val currentLang = prefs.getString("MY_LANG", "en")
+        val newLang = if (currentLang == "en") "th" else "en"
+
+        // Save selection
+        prefs.edit().putString("MY_LANG", newLang).apply()
+
+        // Restart with a smooth fade animation
+        finish()
+        startActivity(intent)
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
     }
 
     private fun sendMessage() {
@@ -73,23 +88,15 @@ class ChatActivity : AppCompatActivity() {
             val myEmail = prefs.getString("user_email", "") ?: ""
             val myName = prefs.getString("user_name", "Me") ?: "Me"
 
-            // Local UI Update
-            val newMessage = ChatMessage(
-                sender = myName,
-                senderEmail = myEmail,
-                content = text
-            )
+            val newMessage = ChatMessage(sender = myName, senderEmail = myEmail, content = text)
             messages.add(newMessage)
             adapter.notifyItemInserted(messages.size - 1)
             chatRecycler.smoothScrollToPosition(messages.size - 1)
             inputMessage.text.clear()
 
-            // Call your API here to save to PostgreSQL
             lifecycleScope.launch {
                 try {
-                    ApiClient.apiService.sendMessage(
-                        MessageRequest(myEmail, receiverEmail, text)
-                    )
+                    ApiClient.apiService.sendMessage(MessageRequest(myEmail, receiverEmail, text))
                 } catch (e: Exception) {
                     Log.e("API_ERROR", e.message ?: "Error")
                 }
@@ -100,23 +107,24 @@ class ChatActivity : AppCompatActivity() {
     private fun fetchMessages() {
         val prefs = getSharedPreferences("APP_PREFS", Context.MODE_PRIVATE)
         val myEmail = prefs.getString("user_email", "") ?: ""
+        Toast.makeText(this, "Fetching data...", Toast.LENGTH_SHORT).show()
 
         lifecycleScope.launch {
             try {
-                // 1. Call the API (receiverEmail is the person you clicked on)
-                val response = ApiClient.apiService.getMessages(myEmail, receiverEmail)
+                // DEBUG LINE 1: See exactly what the phone is asking for
+                Log.d("CHAT_VERIFY", "Fetching: Me($myEmail) with Friend($receiverEmail)")
 
+                val response = ApiClient.apiService.getMessages(myEmail, receiverEmail)
                 if (response.isSuccessful) {
                     val history = response.body() ?: emptyList()
 
-                    // 2. Clear old local list and add the fresh history from DB
+                    // DEBUG LINE 2: See how many messages actually came back
+                    Log.d("CHAT_VERIFY", "Found ${history.size} messages in DB")
+
                     messages.clear()
                     messages.addAll(history)
-
-                    // 3. Tell the adapter to refresh the UI
+                    Log.d("DEBUG_DATA", "First message content: " + messages[0].content)
                     adapter.notifyDataSetChanged()
-
-                    // 4. Scroll to the most recent message
                     if (messages.isNotEmpty()) {
                         chatRecycler.scrollToPosition(messages.size - 1)
                     }
