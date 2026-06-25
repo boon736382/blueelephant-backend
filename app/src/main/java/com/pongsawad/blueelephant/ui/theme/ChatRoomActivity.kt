@@ -14,7 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.pongsawad.blueelephant.network.ApiClient
-import com.pongsawad.blueelephant.network.MessageRequest
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,17 +80,30 @@ class ChatRoomActivity : AppCompatActivity() {
     private fun fetchMessages() {
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                val response = ApiClient.apiService.getMessages(myEmail, receiverEmail)
-                if (response.isSuccessful) {
-                    val newMessages = response.body() ?: emptyList()
-                    withContext(Dispatchers.Main) {
-                        // Only update UI if the message count changed
-                        if (newMessages.size != messageList.size) {
-                            messageList.clear()
-                            messageList.addAll(newMessages)
-                            adapter.notifyDataSetChanged()
-                            chatRecycler.scrollToPosition(messageList.size - 1)
+                // Fetch messages from Supabase PostgreSQL 'messages' table
+                val newMessages = ApiClient.supabase.postgrest["messages"]
+                    .select {
+                        filter {
+                            or {
+                                and {
+                                    eq("sender_email", myEmail)
+                                    eq("receiver_email", receiverEmail)
+                                }
+                                and {
+                                    eq("sender_email", receiverEmail)
+                                    eq("receiver_email", myEmail)
+                                }
+                            }
                         }
+                    }.decodeList<ChatMessage>()
+
+                withContext(Dispatchers.Main) {
+                    // Only update UI if the message count changed
+                    if (newMessages.size != messageList.size) {
+                        messageList.clear()
+                        messageList.addAll(newMessages)
+                        adapter.notifyDataSetChanged()
+                        chatRecycler.scrollToPosition(messageList.size - 1)
                     }
                 }
             } catch (e: Exception) {
@@ -102,7 +115,7 @@ class ChatRoomActivity : AppCompatActivity() {
     private fun sendMessage() {
         val text = inputMessage.text.toString().trim()
         if (text.isNotEmpty()) {
-            val request = MessageRequest(
+            val newMessage = ChatMessage(
                 senderEmail = myEmail,
                 receiverEmail = receiverEmail,
                 content = text
@@ -113,14 +126,9 @@ class ChatRoomActivity : AppCompatActivity() {
 
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val response = ApiClient.apiService.sendMessage(request)
-                    if (response.isSuccessful) {
-                        fetchMessages() // Immediately refresh to show the new message
-                    } else {
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@ChatRoomActivity, "Failed to send", Toast.LENGTH_SHORT).show()
-                        }
-                    }
+                    // Insert message into Supabase PostgreSQL 'messages' table
+                    ApiClient.supabase.postgrest["messages"].insert(newMessage)
+                    fetchMessages() // Immediately refresh
                 } catch (e: Exception) {
                     Log.e("ChatRoom", "Error sending message", e)
                     withContext(Dispatchers.Main) {

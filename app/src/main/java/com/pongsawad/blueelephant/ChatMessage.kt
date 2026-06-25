@@ -1,20 +1,22 @@
 package com.pongsawad.blueelephant
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerialName
 
+@Serializable
 data class ChatMessage(
-    @SerializedName("sender")
+    @SerialName("sender")
     val sender: String? = "User",
 
-    @SerializedName("sender_email")
+    @SerialName("sender_email")
     val senderEmail: String,
 
-    @SerializedName("receiver_email")
-    val receiverEmail: String? = "", // Default value fixes the red line!
+    @SerialName("receiver_email")
+    val receiverEmail: String? = "", 
 
-    @SerializedName("content")
+    @SerialName("content")
     val content: String,
 
-    @SerializedName("created_at")
+    @SerialName("created_at")
     val createdAt: String? = null
 )

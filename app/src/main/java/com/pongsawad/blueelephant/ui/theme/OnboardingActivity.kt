@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.pongsawad.blueelephant.R
 import com.pongsawad.blueelephant.network.ApiClient
+import com.pongsawad.blueelephant.network.UserData
+import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -82,17 +85,8 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun saveProfileToApi(name: String, age: String, gender: String, file: File) {
-        val namePart = name.toRequestBody("text/plain".toMediaTypeOrNull())
-        val agePart = age.toRequestBody("text/plain".toMediaTypeOrNull())
-        val genderPart = gender.toRequestBody("text/plain".toMediaTypeOrNull())
-
         // Use the email saved during Login/Register
         val email = prefs.getString("user_email", "")?.trim()?.lowercase() ?: ""
-        val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
-
-        val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-        // Ensure "profile_image" matches the key in your Node.js upload.single('profile_image')
-        val imagePart = MultipartBody.Part.createFormData("profile_image", file.name, requestFile)
 
         if (email.isEmpty()) {
             Toast.makeText(this, "Session error. Please login again.", Toast.LENGTH_LONG).show()
@@ -104,40 +98,46 @@ class OnboardingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // --- FIX: Change uploadProfile to updateProfile ---
-                val response = ApiClient.apiService.updateProfile(
-                    emailPart, namePart, agePart, genderPart, imagePart
-                )
+                // 1. Upload Image to Supabase Storage
+                // Make sure you have created a PUBLIC bucket named 'profile-images' in Supabase
+                val bucket = ApiClient.supabase.storage.from("profile-images")
+                val fileName = "${email.replace(".", "_")}_${System.currentTimeMillis()}.jpg"
+                val fileBytes = file.readBytes()
+                
+                bucket.upload(fileName, fileBytes)
+                val imageUrl = bucket.publicUrl(fileName)
 
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    val serverUser = body?.user
-
-                    prefs.edit().apply {
-                        putBoolean(ONBOARDING_KEY, true)
-                        putString("user_name", name)
-                        putString("user_age", age)
-                        putString("user_gender", gender)
-
-                        // Save the real URL/Path returned by Render
-                        putString("user_photo_path", serverUser?.profile_image)
-                        apply()
+                // 2. Update Profile in PostgreSQL 'users' table
+                ApiClient.supabase.postgrest["users"].update(
+                    {
+                        set("name", name)
+                        set("age", age.toIntOrNull() ?: 0)
+                        set("gender", gender)
+                        set("profile_image", imageUrl)
                     }
-
-                    Log.d("ONBOARDING", "Profile updated. Image: ${serverUser?.profile_image}")
-                    Toast.makeText(this@OnboardingActivity, "Profile Updated!", Toast.LENGTH_SHORT).show()
-                    navigateToMain()
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Log.e("ONBOARDING_FAIL", errorBody)
-
-                    resetButton()
-                    Toast.makeText(this@OnboardingActivity, "Update Failed: $errorBody", Toast.LENGTH_LONG).show()
+                ) {
+                    filter {
+                        eq("email", email)
+                    }
                 }
+
+                prefs.edit().apply {
+                    putBoolean(ONBOARDING_KEY, true)
+                    putString("user_name", name)
+                    putString("user_age", age)
+                    putString("user_gender", gender)
+                    putString("user_photo_path", imageUrl)
+                    apply()
+                }
+
+                Log.d("ONBOARDING", "Profile updated. Image: $imageUrl")
+                Toast.makeText(this@OnboardingActivity, "Profile Updated!", Toast.LENGTH_SHORT).show()
+                navigateToMain()
+
             } catch (e: Exception) {
-                Log.e("API_ERROR", "Failed: ${e.message}")
+                Log.e("SUPABASE_ERROR", "Failed: ${e.message}")
                 resetButton()
-                Toast.makeText(this@OnboardingActivity, "Server unreachable", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@OnboardingActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

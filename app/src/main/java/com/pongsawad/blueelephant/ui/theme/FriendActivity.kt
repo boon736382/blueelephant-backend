@@ -16,6 +16,8 @@ import com.pongsawad.blueelephant.Friend
 import com.pongsawad.blueelephant.FriendAdapter
 import com.pongsawad.blueelephant.R
 import com.pongsawad.blueelephant.network.ApiClient
+import com.pongsawad.blueelephant.network.UserData
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
 class FriendActivity : AppCompatActivity() {
@@ -82,37 +84,28 @@ class FriendActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val response = ApiClient.apiService.getAllUsers()
-                if (response.isSuccessful) {
-                    val serverList = response.body() ?: emptyList()
+                // Fetch all users from Supabase PostgreSQL 'users' table
+                val serverList = ApiClient.supabase.postgrest["users"]
+                    .select()
+                    .decodeList<UserData>()
 
-                    val mappedList = serverList
-                        .filter { it.name != myName && !it.name.isNullOrEmpty() }
-                        .map { u ->
-                            // Ensure the image path is converted to a full URL
-                            val rawPath = u.profile_image
-                            val friendImageUrl = when {
-                                rawPath.isNullOrEmpty() -> ""
-                                rawPath.startsWith("http") -> rawPath
-                                else -> BASE_URL + rawPath
-                            }
+                val mappedList = serverList
+                    .filter { it.name != myName && !it.name.isNullOrEmpty() }
+                    .map { u ->
+                        Friend(
+                            id = u.id.toString(),
+                            name = u.name ?: "Unknown Friend",
+                            email = u.email ?: "",
+                            status = "Offline",
+                            imageUrl = u.profile_image ?: ""
+                        )
+                    }
 
-                            Friend(
-                                id = u.id.toString(),
-                                name = u.name ?: "Unknown Friend",
-                                email = u.email ?: "",
-                                status = "Offline",
-                                imageUrl = friendImageUrl
-                            )
-                        }
+                Log.d("FRIEND_DEBUG", "Loaded ${mappedList.size} friends")
+                adapter.updateData(mappedList)
 
-                    Log.d("FRIEND_DEBUG", "Loaded ${mappedList.size} friends")
-                    adapter.updateData(mappedList)
-                } else {
-                    Log.e("API_ERROR", "Failed to load users: ${response.code()}")
-                }
             } catch (e: Exception) {
-                Log.e("NETWORK_ERROR", "Check connection: ${e.message}")
+                Log.e("SUPABASE_ERROR", "Check connection: ${e.message}")
             }
         }
     }

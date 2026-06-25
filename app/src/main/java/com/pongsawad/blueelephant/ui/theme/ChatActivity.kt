@@ -10,12 +10,12 @@ import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.pongsawad.blueelephant.BaseActivity // Import your new engine
+import com.pongsawad.blueelephant.BaseActivity
 import com.pongsawad.blueelephant.ChatAdapter
 import com.pongsawad.blueelephant.ChatMessage
 import com.pongsawad.blueelephant.R
 import com.pongsawad.blueelephant.network.ApiClient
-import com.pongsawad.blueelephant.network.MessageRequest
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.launch
 
 // Inherit from BaseActivity to enable the language engine
@@ -92,7 +92,12 @@ class ChatActivity : BaseActivity() {
             val myEmail = prefs.getString("user_email", "") ?: ""
             val myName = prefs.getString("user_name", "Me") ?: "Me"
 
-            val newMessage = ChatMessage(sender = myName, senderEmail = myEmail, content = text)
+            val newMessage = ChatMessage(
+                sender = myName,
+                senderEmail = myEmail,
+                receiverEmail = receiverEmail,
+                content = text
+            )
             messages.add(newMessage)
             adapter.notifyItemInserted(messages.size - 1)
             chatRecycler.smoothScrollToPosition(messages.size - 1)
@@ -100,9 +105,9 @@ class ChatActivity : BaseActivity() {
 
             lifecycleScope.launch {
                 try {
-                    ApiClient.apiService.sendMessage(MessageRequest(myEmail, receiverEmail, text))
+                    ApiClient.supabase.postgrest["messages"].insert(newMessage)
                 } catch (e: Exception) {
-                    Log.e("API_ERROR", e.message ?: "Error")
+                    Log.e("SUPABASE_ERROR", e.message ?: "Error")
                 }
             }
         }
@@ -115,24 +120,36 @@ class ChatActivity : BaseActivity() {
 
         lifecycleScope.launch {
             try {
-                // DEBUG LINE 1: See exactly what the phone is asking for
                 Log.d("CHAT_VERIFY", "Fetching: Me($myEmail) with Friend($receiverEmail)")
 
-                val response = ApiClient.apiService.getMessages(myEmail, receiverEmail)
-                if (response.isSuccessful) {
-                    val history = response.body() ?: emptyList()
+                val history = ApiClient.supabase.postgrest["messages"]
+                    .select {
+                        filter {
+                            or {
+                                and {
+                                    eq("sender_email", myEmail)
+                                    eq("receiver_email", receiverEmail)
+                                }
+                                and {
+                                    eq("sender_email", receiverEmail)
+                                    eq("receiver_email", myEmail)
+                                }
+                            }
+                        }
+                    }.decodeList<ChatMessage>()
 
-                    // DEBUG LINE 2: See how many messages actually came back
-                    Log.d("CHAT_VERIFY", "Found ${history.size} messages in DB")
+                Log.d("CHAT_VERIFY", "Found ${history.size} messages in DB")
 
-                    messages.clear()
-                    messages.addAll(history)
+                messages.clear()
+                messages.addAll(history)
+                if (messages.isNotEmpty()) {
                     Log.d("DEBUG_DATA", "First message content: " + messages[0].content)
                     adapter.notifyDataSetChanged()
-                    if (messages.isNotEmpty()) {
-                        chatRecycler.scrollToPosition(messages.size - 1)
-                    }
+                    chatRecycler.scrollToPosition(messages.size - 1)
+                } else {
+                    adapter.notifyDataSetChanged()
                 }
+
             } catch (e: Exception) {
                 Log.e("FETCH_ERROR", "Failed to load history: ${e.message}")
             }
