@@ -26,6 +26,7 @@ class ChatActivity : BaseActivity() {
     private lateinit var sendBtn: Button
     private lateinit var tvTitle: TextView
     private lateinit var btnTranslate: Button
+    private lateinit var btnBack: android.widget.ImageButton
 
     private val messages = mutableListOf<ChatMessage>()
     private var receiverEmail: String = ""
@@ -45,6 +46,7 @@ class ChatActivity : BaseActivity() {
         sendBtn = findViewById(R.id.sendBtn)
         tvTitle = findViewById(R.id.tv_chat_partner_name)
         btnTranslate = findViewById(R.id.btnTranslate)
+        btnBack = findViewById(R.id.btnBack)
 
         tvTitle.text = friendName
 
@@ -62,6 +64,8 @@ class ChatActivity : BaseActivity() {
         sendBtn.setOnClickListener { sendMessage() }
 
         btnTranslate.setOnClickListener { toggleLanguage() }
+
+        btnBack.setOnClickListener { finish() }
 
         // 5. Load Data
         fetchMessages()

@@ -40,7 +40,7 @@ class FriendActivity : AppCompatActivity() {
         adapter = FriendAdapter(friendList) { selectedFriend ->
             val intent = Intent(this, ChatRoomActivity::class.java)
             intent.putExtra("FRIEND_NAME", selectedFriend.name)
-            intent.putExtra("FRIEND_ID", selectedFriend.id)
+            intent.putExtra("RECEIVER_EMAIL", selectedFriend.email)
             startActivity(intent)
         }
         rvFriends.adapter = adapter
